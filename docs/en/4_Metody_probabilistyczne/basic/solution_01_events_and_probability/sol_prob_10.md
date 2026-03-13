@@ -28,3 +28,63 @@ The total "area" of the sample space is $\frac{d}{2} \times \frac{\pi}{2} = \fra
 * **Additional event definition**: $F$ - the needle is perfectly parallel to the parallel lines.
   This means $\theta = 0$. The probability of picking exactly $\theta = 0$ from a continuous uniform distribution is exactly $0$.
   $P(F) = 0$
+
+<br>
+
+### Experiment Visualization (Python Simulation)
+
+To better understand and visualize this concept, we can simulate Buffon's Needle experiment using Python. The following script simulates dropping the needle thousands of times and visualizes the results, providing an experimental approximation of the probabilities and $\pi$.
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+def simulate_buffons_needle(num_drops=10000, d=2.0, L=1.0):
+    # d: distance between lines
+    # L: length of the needle
+    
+    # 1. Generate random center positions X in [0, d/2]
+    X = np.random.uniform(0, d/2, num_drops)
+    
+    # 2. Generate random angles theta in [0, pi/2]
+    theta = np.random.uniform(0, np.pi/2, num_drops)
+    
+    # Check intersection condition
+    # The needle crosses a line if X <= (L/2) * sin(theta)
+    crosses = X <= (L / 2) * np.sin(theta)
+    
+    # Calculate probabilities
+    p_A = np.sum(crosses) / num_drops
+    
+    # Estimate Pi based on P(A) = 2L / (pi * d) => pi = 2L / (P(A) * d)
+    if p_A > 0:
+        pi_estimate = (2 * L) / (p_A * d)
+    else:
+        pi_estimate = 0
+        
+    # Visualization
+    plt.figure(figsize=(10, 6))
+    
+    # Plot non-crossing drops
+    plt.scatter(theta[~crosses], X[~crosses], color='blue', alpha=0.5, label='No Intersection', s=5)
+    
+    # Plot crossing drops
+    plt.scatter(theta[crosses], X[crosses], color='red', alpha=0.5, label='Intersection', s=5)
+    
+    # Plot the theoretical boundary: X = (L/2) * sin(theta)
+    theta_line = np.linspace(0, np.pi/2, 100)
+    X_line = (L / 2) * np.sin(theta_line)
+    plt.plot(theta_line, X_line, color='black', linewidth=2, label='Boundary: X = (L/2)*sin(θ)')
+    
+    plt.xlim(0, np.pi/2)
+    plt.ylim(0, d/2)
+    plt.xlabel('Angle (θ) in radians')
+    plt.ylabel('Distance from center to line (X)')
+    plt.title(f"Buffon's Needle Simulation ({num_drops} drops)\nEstimated π ≈ {pi_estimate:.4f}")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+# Run the simulation
+simulate_buffons_needle()
+```

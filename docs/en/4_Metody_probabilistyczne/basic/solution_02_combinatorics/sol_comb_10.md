@@ -22,3 +22,52 @@ The urn contains a total of $5 + 4 + 3 = 12$ balls.
    For any specific arrangement pattern, the number of ways to pick the actual 2 red balls in order is $P(5, 2) = 5 \times 4 = 20$.
    The number of ways to pick the 1 non-red ball is $P(7, 1) = 7$.
    $$3 \times 20 \times 7 = 420$$
+
+<br>
+
+### Experiment Visualization (Python Simulation & Diagram)
+
+We can visualize the urn's composition and verify our theoretical combinatorics results using a short Python simulation to experimentally approximate the probabilities.
+
+```mermaid
+pie title Urn Contents (12 balls total)
+    "Red (5)" : 5
+    "Blue (4)" : 4
+    "Green (3)" : 3
+```
+
+**Simulation Script:**
+
+```python
+import random
+
+def simulate_urn_draws(num_trials=100000):
+    # Represent the urn: 5 Red (R), 4 Blue (B), 3 Green (G)
+    urn = ['R']*5 + ['B']*4 + ['G']*3
+    
+    # Track results
+    exactly_two_red = 0
+    
+    for _ in range(num_trials):
+        # Draw 3 balls without replacement
+        sample = random.sample(urn, 3)
+        
+        # Check condition: exactly 2 red balls drawn
+        if sample.count('R') == 2:
+            exactly_two_red += 1
+            
+    # Experimental Probability
+    prob_two_red = exactly_two_red / num_trials
+    
+    # Theoretical Probability
+    # 70 ways to get exactly 2 red balls out of 220 total combinations
+    theoretical_prob = 70 / 220
+    
+    print(f"--- Simulation Results ({num_trials} trials) ---")
+    print(f"Experimental P(exactly 2 red) = {prob_two_red:.4f}")
+    print(f"Theoretical P(exactly 2 red)  = {theoretical_prob:.4f}")
+    print(f"% Error = {abs(prob_two_red - theoretical_prob) / theoretical_prob * 100:.2f}%")
+
+# Run the simulation
+simulate_urn_draws()
+```
