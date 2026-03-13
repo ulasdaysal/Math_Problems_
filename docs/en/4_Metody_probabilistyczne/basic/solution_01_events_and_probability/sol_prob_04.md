@@ -2,25 +2,66 @@
 
 ## Task 4 — Weekly Weather Observation
 
-1. **Sample space $\Omega_1$ for the weather observed on one day:**
-   $$
-   \Omega_1 = \{S, C, R\}
-   $$
+### 1. One Day Observation ($\Omega_1$)
 
-2. **Sample space $\Omega_2$ for two consecutive days:**
-   $$
-   \Omega_2 = \{(w_1, w_2) \mid w_1, w_2 \in \{S, C, R\}\}
-   $$
+**Complete Tree Diagram:**
 
-3. **Sample space $\Omega_7$ describing the weather observed during seven consecutive days:**
-   $$
-   \Omega_7 = \{(w_1, w_2, \dots, w_7) \mid w_i \in \{S, C, R\}\}
-   $$
+```text
+START
+ │
+ ├── S
+ ├── C
+ └── R
+```
 
-4. **Number of elementary outcomes in each sample space:**
-   * $|\Omega_1| = 3^1 = 3$
-   * $|\Omega_2| = 3^2 = 9$
-   * $|\Omega_7| = 3^7 = 2187$
+* **Sample Space:** $\Omega_1 = \{S, C, R\}$
+* **Number of Elementary Outcomes:** $|\Omega_1| = 3^1 = 3$
 
-5. **Briefly describe what an elementary outcome represents in the case of a weekly observation:**
-   An elementary outcome in $\Omega_7$ is an ordered sequence of 7 weather states, corresponding to the specific weather conditions observed on each of the seven consecutive days.
+### 2. Two Consecutive Days ($\Omega_2$)
+
+When observing for a second day, each of the previous outcomes branches out into 3 new possibilities.
+
+**Complete Tree Diagram:**
+
+```text
+START
+ │
+ ├── S
+ │   ├── S  ->  (S,S)
+ │   ├── C  ->  (S,C)
+ │   └── R  ->  (S,R)
+ │
+ ├── C
+ │   ├── S  ->  (C,S)
+ │   ├── C  ->  (C,C)
+ │   └── R  ->  (C,R)
+ │
+ └── R
+     ├── S  ->  (R,S)
+     ├── C  ->  (R,C)
+     └── R  ->  (R,R)
+```
+
+* **Sample Space:** $\Omega_2 = \{(w_1, w_2) \mid w_1, w_2 \in \{S, C, R\}\}$
+* **Number of Elementary Outcomes:** $|\Omega_2| = 3^2 = 9$
+
+### 3. Seven Consecutive Days ($\Omega_7$)
+
+When we observe weather for seven days, the tree would have 7 levels and branch out into $3^7 = 2187$ paths.
+
+**Conceptual Tree Diagram Framework:**
+
+```text
+START
+ │
+ ├── S  ->  (S,S,S,S,S,S,S), ..., (S,R,R,R,R,R,R)
+ ├── C  ->  (C,S,S,S,S,S,S), ..., (C,R,R,R,R,R,R)
+ └── R  ->  (R,S,S,S,S,S,S), ..., (R,R,R,R,R,R,R)
+```
+
+* **Sample Space:** $\Omega_7 = \{(w_1, w_2, \dots, w_7) \mid w_i \in \{S, C, R\}\}$
+* **Number of Elementary Outcomes:** $|\Omega_7| = 3^7 = 2187$
+
+### 5. What an Elementary Outcome Represents
+
+An elementary outcome in $\Omega_7$ is an ordered sequence of 7 weather states, corresponding to the specific weather conditions observed on each of the seven consecutive days.
