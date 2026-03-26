@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events & Probability - Monte Carlo Simulation</title>
+    <!-- Use Chart.js for beautiful visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --primary: #10b981;
+            --primary-hover: #059669;
+            --secondary: #3b82f6;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--surface);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        h1 { margin-top: 0; font-size: 2rem; color: #fff; border-bottom: 2px solid #334155; padding-bottom: 1rem; }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            background: rgba(0,0,0,0.2);
+            padding: 1.5rem;
+            border-radius: 12px;
+            align-items: end;
+        }
+        .control-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        label { font-weight: 500; color: var(--text-muted); font-size: 0.95rem; }
+        select, input[type="number"] {
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        select:focus, input:focus { border-color: var(--primary); }
+        button {
+            padding: 0.85rem;
+            border-radius: 8px;
+            border: none;
+            background: var(--primary);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+        button:hover { background: var(--primary-hover); }
+        button:active { transform: scale(0.98); }
+        
+        .chart-container { 
+            position: relative; 
+            height: 400px; 
+            width: 100%; 
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed #334155;
+        }
+        
+        .explanation {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--primary);
+            border-radius: 0 8px 8px 0;
+            line-height: 1.6;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .stat-box {
+            background: rgba(0,0,0,0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value { font-size: 1.5rem; font-weight: bold; color: var(--secondary); margin-top: 0.5rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎲 Monte Carlo Simulation: Events & Probability</h1>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+            Run thousands of random trials to observe the <strong>Law of Large Numbers</strong>. As you increase the number of trials, the empirical (observed) frequencies will converge to the theoretical probabilities.
+        </p>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="exp-select">Select Experiment</label>
+                <select id="exp-select" onchange="resetExperiment()">
+                    <option value="coin_1">1 Coin Toss</option>
+                    <option value="coin_2">2 Coin Tosses</option>
+                    <option value="die_1">1 Die Roll</option>
+                    <option value="die_2">2 Die Rolls (Sum)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="trials-input">Number of Trials (N)</label>
+                <input type="number" id="trials-input" min="1" max="1000000" value="1000" step="100">
+            </div>
+            <div class="control-group" style="justify-content: flex-end;">
+                <button onclick="runSimulation()">Run Simulation 🚀</button>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="simChart"></canvas>
+        </div>
+
+        <div class="stats" id="stats-container">
+            <!-- Stats go here -->
+        </div>
+        
+        <div id="explanation-text" class="explanation">
+            <strong>Theoretical vs Empirical</strong>:<br> 
+            The solid bars represent the <strong>Observed (Empirical) Frequencies</strong> generated by your simulated trials.<br>
+            The dashed line/overlay represents the <strong>Theoretical Probabilities</strong> calculated using math.<br><br>
+            Try running the simulation with <strong>10 trials</strong>, then try <strong>10,000 trials</strong>. Notice how much closer the results get to the mathematical theory when you simulate more trials!
+        </div>
+    </div>
+
+    <script>
+        let chart;
+
+        function runSimulation() {
+            const exp = document.getElementById('exp-select').value;
+            const trials = parseInt(document.getElementById('trials-input').value);
+            if (isNaN(trials) || trials < 1) return;
+
+            let results = {};
+            let theoretical = {};
+            let labels = [];
+
+            if (exp === 'coin_1') {
+                labels = ['Heads', 'Tails'];
+                results = {'Heads': 0, 'Tails': 0};
+                theoretical = {'Heads': 0.5, 'Tails': 0.5};
+                for(let i=0; i<trials; i++) {
+                    Math.random() < 0.5 ? results['Heads']++ : results['Tails']++;
+                }
+            } 
+            else if (exp === 'coin_2') {
+                labels = ['HH (2 Heads)', 'HT/TH (1 Head)', 'TT (0 Heads)'];
+                results = {'HH (2 Heads)': 0, 'HT/TH (1 Head)': 0, 'TT (0 Heads)': 0};
+                theoretical = {'HH (2 Heads)': 0.25, 'HT/TH (1 Head)': 0.50, 'TT (0 Heads)': 0.25};
+                for(let i=0; i<trials; i++) {
+                    let heads = (Math.random() < 0.5 ? 1 : 0) + (Math.random() < 0.5 ? 1 : 0);
+                    if (heads === 2) results['HH (2 Heads)']++;
+                    else if (heads === 1) results['HT/TH (1 Head)']++;
+                    else results['TT (0 Heads)']++;
+                }
+            }
+            else if (exp === 'die_1') {
+                labels = ['1', '2', '3', '4', '5', '6'];
+                results = {'1':0, '2':0, '3':0, '4':0, '5':0, '6':0};
+                for(let i=1; i<=6; i++) theoretical[i.toString()] = 1/6;
+                for(let i=0; i<trials; i++) {
+                    let roll = Math.floor(Math.random() * 6) + 1;
+                    results[roll.toString()]++;
+                }
+            }
+            else if (exp === 'die_2') {
+                for(let i=2; i<=12; i++) {
+                    labels.push(i.toString());
+                    results[i.toString()] = 0;
+                }
+                // Theoretical sum probabilities for 2 dice
+                const sums = {2:1, 3:2, 4:3, 5:4, 6:5, 7:6, 8:5, 9:4, 10:3, 11:2, 12:1};
+                for(let i=2; i<=12; i++) theoretical[i.toString()] = sums[i]/36;
+                
+                for(let i=0; i<trials; i++) {
+                    let r1 = Math.floor(Math.random() * 6) + 1;
+                    let r2 = Math.floor(Math.random() * 6) + 1;
+                    results[(r1+r2).toString()]++;
+                }
+            }
+
+            drawChart(labels, results, theoretical, trials);
+            updateStats(trials);
+        }
+
+        function drawChart(labels, empiricalCounts, theoreticalRates, totalTrials) {
+            const ctx = document.getElementById('simChart').getContext('2d');
+            
+            let empiricalData = labels.map(l => empiricalCounts[l] / totalTrials);
+            let theoreticalData = labels.map(l => theoreticalRates[l]);
+
+            if (chart) {
+                chart.data.labels = labels;
+                chart.data.datasets[0].data = empiricalData;
+                chart.data.datasets[1].data = theoreticalData;
+                chart.update();
+                return;
+            }
+
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Empirical (Observed)',
+                            data: empiricalData,
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: '#10b981',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Theoretical Probability',
+                            data: theoreticalData,
+                            type: 'line',
+                            backgroundColor: 'rgba(59, 130, 246, 0)',
+                            borderColor: '#3b82f6',
+                            borderWidth: 3,
+                            borderDash: [5, 5],
+                            pointBackgroundColor: '#3b82f6',
+                            pointRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#f8fafc' } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${(context.raw * 100).toFixed(2)}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(51, 65, 85, 0.5)' },
+                            ticks: { 
+                                color: '#94a3b8',
+                                callback: function(value) { return (value * 100).toFixed(0) + '%'; } 
+                            },
+                            title: { display: true, text: 'Probability (%)', color: '#cbd5e1' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' },
+                            title: { display: true, text: 'Outcomes', color: '#cbd5e1' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateStats(trials) {
+            const container = document.getElementById('stats-container');
+            container.innerHTML = `
+                <div class="stat-box">
+                    <div>Total Trials Run</div>
+                    <div class="stat-value">${trials.toLocaleString()}</div>
+                </div>
+            `;
+        }
+
+        function resetExperiment() {
+            if (chart) {
+                chart.destroy();
+                chart = null;
+            }
+            document.getElementById('stats-container').innerHTML = '';
+        }
+
+        // Auto-run once on load
+        window.onload = runSimulation;
+    </script>
+</body>
+</html>
