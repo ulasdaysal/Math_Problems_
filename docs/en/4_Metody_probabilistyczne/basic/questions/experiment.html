@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probability Distributions Experiment</title>
+    <!-- Use Chart.js for beautiful visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--surface);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        h1 { margin-top: 0; font-size: 2rem; color: #fff; border-bottom: 2px solid #334155; padding-bottom: 1rem; }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            background: rgba(0,0,0,0.2);
+            padding: 1.5rem;
+            border-radius: 12px;
+            align-items: end;
+        }
+        .control-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        label { font-weight: 500; color: var(--text-muted); font-size: 0.95rem; }
+        select, input[type="range"] {
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+            cursor: pointer;
+        }
+        select:focus, input:focus { border-color: var(--primary); }
+        .val-display { font-weight: bold; color: var(--primary); }
+        
+        .chart-container { 
+            position: relative; 
+            height: 450px; 
+            width: 100%; 
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed #334155;
+        }
+        
+        /* hide parameters conditionally */
+        #binomial-params, #poisson-params { display: none; }
+        .active-params { display: contents !important; }
+        
+        .explanation {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid var(--primary);
+            border-radius: 0 8px 8px 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎲 Probability Distributions Experiment</h1>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+            Interact with the sliders below to dynamically visualize how changes in parameters affect different probability distributions.
+        </p>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="dist-select">Choose Distribution Model</label>
+                <select id="dist-select" onchange="updateUI()">
+                    <option value="binomial">Binomial Distribution</option>
+                    <option value="poisson">Poisson Distribution</option>
+                </select>
+            </div>
+
+            <div id="binomial-params" class="active-params">
+                <div class="control-group">
+                    <label for="b-n">Number of Trials (n): <span id="n-val" class="val-display">20</span></label>
+                    <input type="range" id="b-n" min="1" max="100" value="20" oninput="updateChart()">
+                </div>
+                <div class="control-group">
+                    <label for="b-p">Probability of Success (p): <span id="p-val" class="val-display">0.50</span></label>
+                    <input type="range" id="b-p" min="0.01" max="0.99" step="0.01" value="0.5" oninput="updateChart()">
+                </div>
+            </div>
+
+            <div id="poisson-params">
+                <div class="control-group">
+                    <label for="p-l">Average Rate (λ): <span id="l-val" class="val-display">5.0</span></label>
+                    <input type="range" id="p-l" min="0.1" max="30" step="0.1" value="5" oninput="updateChart()">
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="distChart"></canvas>
+        </div>
+        
+        <div id="explanation-text" class="explanation">
+            <!-- Dynamic explanation text injected here -->
+        </div>
+    </div>
+
+    <script>
+        let chart;
+
+        // Math utilities for calculations
+        function factorial(n) {
+            if (n === 0 || n === 1) return 1;
+            let f = 1;
+            for(let i=2; i<=n; i++) f *= i;
+            return f;
+        }
+
+        function combination(n, k) {
+            // optimized combination to avoid huge numbers
+            if (k < 0 || k > n) return 0;
+            if (k === 0 || k === n) return 1;
+            if (k > n / 2) k = n - k;
+            let c = 1;
+            for (let i = 1; i <= k; i++) {
+                c *= (n - i + 1);
+                c /= i;
+            }
+            return c;
+        }
+
+        function calculateBinomial(n, p) {
+            let labels = [];
+            let data = [];
+            for(let k = 0; k <= n; k++) {
+                labels.push(k);
+                let prob = combination(n, k) * Math.pow(p, k) * Math.pow(1-p, n-k);
+                data.push(prob);
+            }
+            return { labels, data };
+        }
+
+        function calculatePoisson(lambda) {
+            let labels = [];
+            let data = [];
+            let maxK = Math.max(15, Math.ceil(lambda + 4 * Math.sqrt(lambda))); // Show enough of the tail
+            for(let k = 0; k <= maxK; k++) {
+                labels.push(k);
+                let prob = (Math.pow(lambda, k) * Math.exp(-lambda)) / factorial(k);
+                data.push(prob);
+            }
+            return { labels, data };
+        }
+
+        function updateUI() {
+            const dist = document.getElementById('dist-select').value;
+            if(dist === 'binomial') {
+                document.getElementById('binomial-params').classList.add('active-params');
+                document.getElementById('poisson-params').classList.remove('active-params');
+            } else {
+                document.getElementById('binomial-params').classList.remove('active-params');
+                document.getElementById('poisson-params').classList.add('active-params');
+            }
+            updateChart();
+        }
+
+        function getExplanation(dist, param1, param2) {
+            if (dist === 'binomial') {
+                return `<strong>Binomial Model</strong>: This chart shows the probability of obtaining exactly <em>k</em> successes in <strong>${param1}</strong> independent trials, where each trial has a <strong>${(param2*100).toFixed(0)}%</strong> chance of success.<br>Notice how the distribution shifts left or right as you change <em>p</em>, and how it resembles a normal bell curve when <em>n</em> gets larger and <em>p</em> is around 0.5.`;
+            } else {
+                return `<strong>Poisson Model</strong>: This chart shows the probability of exactly <em>k</em> events occurring in a fixed interval, given that events happen at a constant average rate of <strong>${param1.toFixed(1)}</strong> (λ).<br>Notice that the peak of the probability mass is generally around the average rate λ. It is often used to model rare events over time or space.`;
+            }
+        }
+
+        function updateChart() {
+            const dist = document.getElementById('dist-select').value;
+            let result;
+            let labelText;
+            let expText;
+
+            if (dist === 'binomial') {
+                const n = parseInt(document.getElementById('b-n').value);
+                const p = parseFloat(document.getElementById('b-p').value);
+                document.getElementById('n-val').innerText = n;
+                document.getElementById('p-val').innerText = p.toFixed(2);
+                result = calculateBinomial(n, p);
+                labelText = `Binomial P(X=k) | n=${n}, p=${p.toFixed(2)}`;
+                expText = getExplanation('binomial', n, p);
+            } else {
+                const l = parseFloat(document.getElementById('p-l').value);
+                document.getElementById('l-val').innerText = l.toFixed(1);
+                result = calculatePoisson(l);
+                labelText = `Poisson P(X=k) | λ=${l.toFixed(1)}`;
+                expText = getExplanation('poisson', l);
+            }
+
+            document.getElementById('explanation-text').innerHTML = expText;
+            drawChart(result.labels, result.data, labelText);
+        }
+
+        function drawChart(labels, data, labelText) {
+            const ctx = document.getElementById('distChart').getContext('2d');
+            
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.85)'); // Blue
+            gradient.addColorStop(1, 'rgba(139, 92, 246, 0.85)'); // Purple
+
+            if (chart) {
+                chart.data.labels = labels;
+                chart.data.datasets[0].data = data;
+                chart.data.datasets[0].label = labelText;
+                chart.update();
+                return;
+            }
+
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: labelText,
+                        data: data,
+                        backgroundColor: gradient,
+                        borderColor: '#60a5fa',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        hoverBackgroundColor: '#3b82f6'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 300 // smooth and fast transitions
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#f8fafc', font: { size: 14, family: "'Inter', sans-serif" } } },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleFont: { size: 14 },
+                            bodyFont: { size: 14 },
+                            padding: 12,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Probability: ${(context.raw * 100).toFixed(2)}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(51, 65, 85, 0.5)' },
+                            ticks: { 
+                                color: '#94a3b8',
+                                callback: function(value) { return value.toFixed(2); } 
+                            },
+                            title: { display: true, text: 'Probability P(X = k)', color: '#cbd5e1', font: {size: 13} }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' },
+                            title: { display: true, text: 'Number of Occurrences / Successes (k)', color: '#cbd5e1', font: {size: 13} }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize display
+        updateChart();
+    </script>
+</body>
+</html>
