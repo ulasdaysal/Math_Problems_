@@ -43,3 +43,5 @@ $$ P(3, 2, 1) = \frac{6!}{3! \cdot 2! \cdot 1!} \cdot (0.40)^3 \cdot (0.35)^2 \c
    $$ P(3, 2, 1) = 0.1176 $$
 
 The probability of drawing exactly this combination of candies is **$11.76\%$**.
+
+

@@ -34,3 +34,18 @@ Now, subtract from 1:
 $$ P(X \ge 1) = 1 - 0.006738 = 0.993262 $$
 
 The probability of receiving at least one request is approximately **$99.33\%$**.
+
+---
+
+### 3. Distribution Table ($\lambda = 5$)
+
+| $k$ (Number of requests) | Exact Formula | Approximate Value |
+|:---:|:---:|:---:|
+| **0** | $\frac{5^0 e^{-5}}{0!}$ | $0.67\%$ |
+| **1** | $\frac{5^1 e^{-5}}{1!}$ | $3.37\%$ |
+| **2** | $\frac{5^2 e^{-5}}{2!}$ | $8.42\%$ |
+| **3** | $\frac{5^3 e^{-5}}{3!}$ | $14.04\%$ |
+| **4** | $\frac{5^4 e^{-5}}{4!}$ | $17.55\%$ |
+| **5** | $\frac{5^5 e^{-5}}{5!}$ | $17.55\%$ |
+| **6** | $\frac{5^6 e^{-5}}{6!}$ | $14.62\%$ |
+| **...** | ... | ... |

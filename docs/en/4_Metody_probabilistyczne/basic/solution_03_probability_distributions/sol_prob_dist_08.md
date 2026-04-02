@@ -40,3 +40,18 @@ Using the complementary event (no errors in the first 3 trials):
 $$ P(X \le 3) = 1 - P(\text{no errors in 3 trials}) = 1 - (0.9)^3 = 1 - 0.729 = 0.271 $$
 
 The probability is **$27.10\%$**.
+
+---
+
+### 3. Distribution Table and Visualization
+
+| $k$ (Trial of 1st error) | Exact Formula | Approximate Probability |
+|:---:|:---|:---:|
+| **1** | $0.1$ | $10.00\%$ |
+| **2** | $0.9^1 \cdot 0.1$ | $9.00\%$ |
+| **3** | $0.9^2 \cdot 0.1$ | $8.10\%$ |
+| **4** | $0.9^3 \cdot 0.1$ | $7.29\%$ |
+| **5** | $0.9^4 \cdot 0.1$ | $6.56\%$ |
+| **...** | ... | ... |
+
+*(The probability decreases steadily as the number of error-free trials increases)*

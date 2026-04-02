@@ -38,3 +38,29 @@ Now, subtract from 1:
 $$ P(X \ge 1) = 1 - 0.6648 = 0.3352 $$
 
 The probability of finding at least one defective part is approximately **$33.52\%$**.
+
+---
+
+### 3. Distribution Table and Visualization
+
+| $k$ (Defective) | Probability $P(X=k)$ | Approximate Value |
+|:---:|:---|:---:|
+| **0** | $\binom{10}{0} (0.04)^0 (0.96)^{10}$ | $66.48\%$ |
+| **1** | $\binom{10}{1} (0.04)^1 (0.96)^9$ | $27.70\%$ |
+| **2** | $\binom{10}{2} (0.04)^2 (0.96)^8$ | $5.19\%$ |
+| **3** | $\binom{10}{3} (0.04)^3 (0.96)^7$ | $0.58\%$ |
+| **4+** | ... | $<0.05\%$ |
+
+**Visualising the Distribution:**
+```text
+Probability (%)
+ 70 | ████████████████████████████████████████ (66.48%)
+ 60 |
+ 50 |
+ 40 |
+ 30 |
+ 20 | █████████████████ (27.70%)
+ 10 |
+  0 |_███_(5.19%)_____________________________________
+          k=0               k=1              k=2
+```

@@ -31,3 +31,26 @@ Now plug them into the formula:
 $$ P(X = 2) = \frac{3 \cdot 220}{3003} = \frac{660}{3003} \approx 0.2198 $$
 
 The probability that exactly 2 defective bulbs are chosen is approximately **$21.98\%$**.
+
+---
+
+### 3. Distribution Table and Visualization
+
+| $k$ (Defective drawn) | Exact Value Formula | Approximate Probability |
+|:---:|:---:|:---:|
+| **0** | $\frac{\binom{3}{0} \cdot \binom{12}{5}}{\binom{15}{5}} = \frac{1 \cdot 792}{3003}$ | $\approx 26.37\%$ |
+| **1** | $\frac{\binom{3}{1} \cdot \binom{12}{4}}{\binom{15}{5}} = \frac{3 \cdot 495}{3003}$ | $\approx 49.45\%$ |
+| **2** | $\frac{\binom{3}{2} \cdot \binom{12}{3}}{\binom{15}{5}} = \frac{3 \cdot 220}{3003}$ | $\approx 21.98\%$ |
+| **3** | $\frac{\binom{3}{3} \cdot \binom{12}{2}}{\binom{15}{5}} = \frac{1 \cdot 66}{3003}$ | $\approx 2.20\%$ |
+
+**Visualising the Distribution:**
+```text
+Probability (%)
+ 50 |                                   ███████ (49.45%)
+ 40 |
+ 30 |           ███████ (26.37%)
+ 20 |                                                   ███████ (21.98%)
+ 10 |                                                                           ███████ (2.20%)
+  0 |___________|___________________|___________________|___________________|___________
+          k = 0               k = 1               k = 2               k = 3
+```
