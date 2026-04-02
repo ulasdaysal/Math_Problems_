@@ -16,9 +16,17 @@ $$ \Omega = \{0, 1, 2, 3, 4, \dots \} = \mathbb{N}_0 $$
 ---
 
 ### 3. Formula of the Probability Distribution
+**Why Poisson?**
+It is a Poisson distribution because we are observing isolated, independent events (error reports) happening continuously over a fixed, continuous interval of time (1 hour), and we have a constant average rate known for that interval.
+
 The probability of receiving exactly $k$ error reports in the given time interval follows a **Poisson distribution**:
 
 $$ P(X = k) = \frac{\lambda^k e^{-\lambda}}{k!} $$
+
+**What does this formula mean?**  
+- $\lambda^k$: Reflects scaling our average expected rate ($\lambda$) by the specific number of events we're testing for ($k$).
+- $e^{-\lambda}$: A decay modifier that ensures that as the number of events deviates far from the expected average, the probability drops exponentially.
+- $k!$: Corrects the probability by adjusting for the multiple identical combinations of ordering the indistinguishable events.
 
 Where:
 - $X$ is the random variable representing the number of error reports

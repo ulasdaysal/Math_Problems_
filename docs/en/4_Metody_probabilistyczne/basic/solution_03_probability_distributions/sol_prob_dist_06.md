@@ -8,18 +8,24 @@
 - Number of trials (parts checked): $n = 10$
 - Random variable $X$: number of defective parts in the sample.
 
+**Why Binomial?**  
+This is a binomial distribution because we have a fixed number of independent trials ($n=10$) with only two possible outcomes per trial (defective or working), and the probability of success ($p=0.04$) is constant.
+
 ---
 
 ### 1. Probability that exactly 2 parts are defective ($k = 2$)
 We use the binomial distribution formula:
 $$ P(X = k) = \binom{n}{k} \cdot p^k \cdot (1-p)^{n-k} $$
 
+**What does this formula mean?**  
+- $\binom{n}{k}$: The number of ways to distribute exactly $k$ defective parts among the $n$ total parts.  
+- $p^k$: The probability that those exactly $k$ parts are defective.  
+- $(1-p)^{n-k}$: The probability that the remaining $(n-k)$ parts are working perfectly.  
+
 Substitute the given values:
 $$ P(X = 2) = \binom{10}{2} \cdot (0.04)^2 \cdot (0.96)^8 $$
 
-$$ \binom{10}{2} = \frac{10!}{2!(10-2)!} = \frac{10 \times 9}{2} = 45 $$
-
-$$ P(X = 2) = 45 \cdot 0.0016 \cdot 0.721389 \approx 0.0519 $$
+$$ P(X = 2) \approx 0.0519 $$
 
 So, the probability is approximately **$5.19\%$**.
 
@@ -32,7 +38,7 @@ The opposite of "at least one defective" is "**zero defective parts**" ($k = 0$)
 $$ P(X \ge 1) = 1 - P(X = 0) $$
 
 Calculate $P(X = 0)$:
-$$ P(X = 0) = \binom{10}{0} \cdot (0.04)^0 \cdot (0.96)^{10} = 1 \cdot 1 \cdot 0.664832 \approx 0.6648 $$
+$$ P(X = 0) = \binom{10}{0} \cdot (0.04)^0 \cdot (0.96)^{10} \approx 0.6648 $$
 
 Now, subtract from 1:
 $$ P(X \ge 1) = 1 - 0.6648 = 0.3352 $$

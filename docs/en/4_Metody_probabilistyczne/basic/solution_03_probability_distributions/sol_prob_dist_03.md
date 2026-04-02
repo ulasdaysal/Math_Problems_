@@ -21,7 +21,10 @@ $$ \Omega_X = \{1, 2, 3, 4, 5, \dots \} = \mathbb{N}^+ $$
 ---
 
 ### 3. Probability Distribution
-This follows a **Geometric Distribution**. The probability that the first error appears exactly on the $k$-th page means we must have $k-1$ non-error pages followed by $1$ error page.
+**Why Geometric?**
+This is a geometric distribution because we are looking purely at the "waiting time". We execute continuous independent trials and we only care about the exact number of trials needed to achieve the **very first** success (finding the printing error).
+
+The probability that the first error appears exactly on the $k$-th page means we must have $k-1$ non-error pages followed by $1$ error page.
 
 Using $p$ as the probability of an error on any given page:
 * $P(S) = p$
@@ -30,6 +33,10 @@ Using $p$ as the probability of an error on any given page:
 The probability distribution is given by:
 
 $$ P(X = k) = (1 - p)^{k-1} \cdot p $$
+
+**What does this formula mean?**  
+- $(1 - p)^{k-1}$: Represents the probability of chaining together exactly $k-1$ "failures" (good pages) in a row.
+- $p$: Represents the probability of the single "success" occurring right after the streak of failures.
 
 Where:
 - $X$ is the random variable (the trial number of the first success)

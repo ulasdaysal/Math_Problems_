@@ -22,9 +22,17 @@ As indicated by the sample space above, the possible values the random variable 
 ---
 
 ### 4. Probability Distribution
-This follows a **Hypergeometric Distribution**. The formula to compute the probability of drawing exactly $k$ defective components is:
+**Why Hypergeometric?**
+This is a hypergeometric distribution because it models the probability of a specific number of successes (defective components) over a fixed number of draws ($n=4$), but **without replacement** from a finite population ($N=20$). Unlike the Binomial model, the probability changes dynamically with each draw!
+
+The formula to compute the probability of drawing exactly $k$ defective components is:
 
 $$ P(X = k) = \frac{\binom{K}{k} \cdot \binom{N - K}{n - k}}{\binom{N}{n}} $$
+
+**What does this formula mean?**  
+- $\binom{K}{k}$: The number of ways to pick $k$ defective components from the total $K$ available defective components.
+- $\binom{N - K}{n - k}$: The number of ways to pick the remaining working components from the available working components.
+- $\binom{N}{n}$: The total possible number of ways to pick any $n$ components from the entire pool of $N$ components.
 
 Where:
 - $N = 20$ (Total number of components)

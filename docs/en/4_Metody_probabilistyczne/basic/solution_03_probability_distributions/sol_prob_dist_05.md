@@ -27,9 +27,16 @@ For example, $(5, 0, 0)$ means all 5 rolls were small numbers. $(1, 2, 2)$ means
 ---
 
 ### 3. The Multinomial Distribution
+**Why Multinomial?**
+This is a multinomial distribution because it is the exact same logic as a Binomial distribution, but expanded to allow more than two distinct outcomes. We have a set number of independent trials ($n=5$) categorized into three mutually exclusive categories!
+
 The probability of obtaining a specific combination of counts $(k_1, k_2, k_3)$ is given by the Multinomial formula (a generalization of the binomial theorem):
 
 $$ P(X_1 = k_1, X_2 = k_2, X_3 = k_3) = \frac{n!}{k_1! \cdot k_2! \cdot k_3!} \cdot (p_1)^{k_1} (p_2)^{k_2} (p_3)^{k_3} $$
+
+**What does this formula mean?**  
+- $\frac{n!}{k_1! \cdot k_2! \cdot k_3!}$: The Multinomial Coefficient. It calculates exactly how many unique ways we can order the specific counts of each category across all $n$ trials.
+- $(p_i)^{k_i}$: Represents the base probability of category $i$ happening exactly $k_i$ times.
 
 Where:
 - $n = 5$ (total rolls)

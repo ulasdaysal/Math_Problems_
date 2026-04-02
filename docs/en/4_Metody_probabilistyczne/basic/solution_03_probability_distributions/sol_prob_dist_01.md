@@ -63,3 +63,19 @@ In probability modeling, a **"success"** does not necessarily mean a positive or
 In this model, since we are interested in the number of defective screws, **a "success" is defined as drawing a defective screw.**
 - Probability of success: $p$
 - Probability of failure: $1-p$
+
+---
+
+### 5. Why Binomial?
+This experiment represents a binomial distribution because:
+- We execute a fixed number ($n=3$) of identical, independent trials.
+- There are only two possible outcomes per trial (Good or Defective).
+- The probability of success ($p$) is constant across all trials.
+
+The general Binomial Formula is:
+$$ P(X = k) = \binom{n}{k} \cdot p^k \cdot (1-p)^{n-k} $$
+
+**What does this formula mean?**  
+- $\binom{n}{k}$: Counts the number of different ways to order $k$ successes across the $n$ trials.  
+- $p^k$: The probability of experiencing exactly $k$ successes.  
+- $(1-p)^{n-k}$: The probability of getting $(n-k)$ failures in the rest of the trials.

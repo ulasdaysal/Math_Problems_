@@ -11,6 +11,9 @@ There are three categories of outcomes (flavors) with the following probabilitie
 
 *(Check: $0.40 + 0.35 + 0.25 = 1.00$)*
 
+**Why Multinomial?**  
+This is a multinomial distribution because we are making a fixed number of independent draws ($n=6$) and classifying the results into more than two distinct and mutually exclusive categories (three candy flavors).
+
 ---
 
 ### Probability of obtaining exactly 3 strawberry, 2 lemon, and 1 mint
@@ -24,23 +27,14 @@ The specific counts we want are:
 The multinomial formula is:
 $$ P(X_1=k_1, X_2=k_2, X_3=k_3) = \frac{n!}{k_1! \cdot k_2! \cdot k_3!} (p_1)^{k_1} (p_2)^{k_2} (p_3)^{k_3} $$
 
+**What does this formula mean?**  
+- $\frac{n!}{k_1! \cdot k_2! \cdot k_3!}$: The Multinomial Coefficient, representing all the different valid ways to order this specific combination of candies.  
+- $(p_i)^{k_i}$: The individual probability of drawing flavor $i$ exactly $k_i$ times.  
+
 Substitute the given values:
 $$ P(3, 2, 1) = \frac{6!}{3! \cdot 2! \cdot 1!} \cdot (0.40)^3 \cdot (0.35)^2 \cdot (0.25)^1 $$
 
-**Step-by-step calculation:**
-1. **Factorial part (Multinomial Coefficient):**
-   $$ \frac{720}{6 \cdot 2 \cdot 1} = \frac{720}{12} = 60 $$
-   *(This means there are 60 different valid ordering sequences of drawing 3 strawberry, 2 lemon, and 1 mint)*
-
-2. **Probability products:**
-   $$ (0.40)^3 = 0.064 $$
-   $$ (0.35)^2 = 0.1225 $$
-   $$ (0.25)^1 = 0.25 $$
-
-3. **Bring it all together:**
-   $$ P(3, 2, 1) = 60 \cdot 0.064 \cdot 0.1225 \cdot 0.25 $$
-   $$ P(3, 2, 1) = 60 \cdot 0.00196 $$
-   $$ P(3, 2, 1) = 0.1176 $$
+$$ P(3, 2, 1) \approx 0.1176 $$
 
 The probability of drawing exactly this combination of candies is **$11.76\%$**.
 
