@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Sample Space: Coin × Coin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-grad-1: #0f172a;
+            --bg-grad-2: #1e1b4b;
+            --accent-glow: rgba(139, 92, 246, 0.6);
+            --accent-border: rgba(167, 139, 250, 1);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: radial-gradient(circle at top right, var(--bg-grad-2), var(--bg-grad-1));
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 90%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            padding: 40px;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #a78bfa, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        /* The Grid Layout */
+        .grid-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: auto 1fr 1fr;
+            grid-template-rows: auto 1fr 1fr;
+            gap: 15px;
+            align-items: center;
+            justify-items: center;
+        }
+
+        .axis-label {
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .axis-h {
+            grid-column: 2 / span 2;
+            grid-row: 1;
+            margin-bottom: 10px;
+        }
+
+        .axis-v {
+            grid-column: 1;
+            grid-row: 2 / span 2;
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            margin-right: 10px;
+        }
+
+        .header-cell {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .h-col {
+            grid-row: 2;
+        }
+
+        .h-row {
+            grid-column: 2;
+        }
+
+        /* The Sample Space Cells */
+        .cell {
+            width: 100px;
+            height: 100px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cell::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .cell.active {
+            background: rgba(139, 92, 246, 0.2);
+            border-color: var(--accent-border);
+            color: #fff;
+            box-shadow: 0 0 20px var(--accent-glow), inset 0 0 15px rgba(139, 92, 246, 0.3);
+            transform: scale(1.05);
+        }
+
+        .cell.active::before {
+            opacity: 1;
+        }
+
+        /* Controls Section */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .btn.active {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            border-color: transparent;
+            box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+            font-weight: 600;
+        }
+
+        /* Math Display */
+        .math-display {
+            margin-top: 24px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .math-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .math-formula {
+            font-size: 1.3rem;
+            font-family: monospace;
+            color: #c084fc;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Interactive Grid -->
+        <div class="grid-wrapper">
+            <h1 style="text-align: center; margin-bottom: 40px; font-size: 2rem;">Sample Space Ω</h1>
+            <div class="grid-container">
+                <!-- Labels -->
+                <div class="axis-label axis-h">Toss 2</div>
+                <div class="axis-label axis-v">Toss 1</div>
+
+                <!-- Empty corner -->
+                <div></div>
+
+                <!-- Column Headers -->
+                <div class="header-cell">H</div>
+                <div class="header-cell">T</div>
+
+                <!-- Row 1 -->
+                <div class="header-cell">H</div>
+                <div class="cell" id="cell-HH">HH</div>
+                <div class="cell" id="cell-HT">HT</div>
+
+                <!-- Row 2 -->
+                <div class="header-cell">T</div>
+                <div class="cell" id="cell-TH">TH</div>
+                <div class="cell" id="cell-TT">TT</div>
+            </div>
+        </div>
+
+        <!-- Event Controls -->
+        <div class="controls">
+            <h1>Events</h1>
+            <p class="subtitle">Click an event to observe its formal subset representation within the Cartesian space.
+            </p>
+
+            <button class="btn" onclick="highlight(['HT', 'TH'], this, '{(H, T), (T, H)}')">
+                <span>1. Exactly one head</span>
+            </button>
+            <button class="btn" onclick="highlight(['HH', 'TT'], this, '{(H, H), (T, T)}')">
+                <span>2. Both tosses are the same</span>
+            </button>
+            <button class="btn"
+                onclick="highlight(['HH', 'HT', 'TH'], this, '{(H, H), (H, T), (T, H)} = Ω \\ {(T, T)}')">
+                <span>3. At least one head</span>
+            </button>
+            <button class="btn" onclick="highlight(['TH', 'TT'], this, '{(T, H), (T, T)}')">
+                <span>4. The first toss is tails</span>
+            </button>
+            <button class="btn" onclick="highlight(['HH', 'TH'], this, '{(H, H), (T, H)}')">
+                <span>5. The second toss is heads</span>
+            </button>
+            <button class="btn" onclick="highlight(['HH', 'HT'], this, '{(H, H), (H, T)}')">
+                <span>Case 1: The first toss is heads</span>
+            </button>
+
+            <div class="math-display">
+                <div class="math-title">Formal Set Formulation</div>
+                <div class="math-formula" id="formula-display">A = ∅</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Start by highlighting nothing or all depending on preference. Let's start blank.
+        const allCells = ['HH', 'HT', 'TH', 'TT'];
+
+        function highlight(activeCells, buttonElement, formulaText) {
+            // Remove active class from all cells
+            allCells.forEach(cell => {
+                document.getElementById('cell-' + cell).classList.remove('active');
+            });
+
+            // Add active class to specified cells
+            activeCells.forEach(cell => {
+                document.getElementById('cell-' + cell).classList.add('active');
+            });
+
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Add active class to clicked button
+            buttonElement.classList.add('active');
+
+            // Update formula text
+            const formulaDisplay = document.getElementById('formula-display');
+
+            // tiny animation for text
+            formulaDisplay.style.opacity = 0;
+            setTimeout(() => {
+                formulaDisplay.textContent = 'A = ' + formulaText;
+                formulaDisplay.style.opacity = 1;
+            }, 150);
+        }
+    </script>
+</body>
+
+</html>
