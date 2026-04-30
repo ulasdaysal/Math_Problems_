@@ -57,6 +57,47 @@
             background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 0.9rem;
+            color: #9ca3af;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #11131c;
+            padding: 5px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        .toggle-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: none;
+            color: #9ca3af;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .toggle-btn.active {
+            background: var(--accent-primary);
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .mode-container {
+            display: none;
+        }
+        .mode-container.active {
+            display: block;
         }
 
         .input-group {
@@ -70,6 +111,7 @@
             font-weight: 600;
             font-size: 0.9rem;
             width: 50px;
+            color: var(--accent-secondary);
         }
 
         input[type="range"] {
@@ -83,7 +125,7 @@
             text-align: right;
             font-family: monospace;
             font-size: 1rem;
-            color: var(--accent-secondary);
+            color: var(--text-color);
         }
 
         .charts-container {
@@ -107,13 +149,6 @@
             font-size: 0.9rem;
             line-height: 1.8;
         }
-        
-        .normalized-warning {
-            font-size: 0.8rem;
-            color: #9ca3af;
-            margin-top: -0.5rem;
-            margin-bottom: 1.5rem;
-        }
     </style>
 </head>
 <body>
@@ -121,43 +156,84 @@
     <div class="container">
         <!-- Controls Panel -->
         <div class="panel">
-            <h1>Modify PMF Values</h1>
-            <p style="font-size: 0.9rem; margin-bottom: 1rem;">Adjust the relative weights. Probabilities will auto-normalize so they always sum to 1.00.</p>
-            <div class="normalized-warning">* Automatic Sum: <span id="sumDisplay" style="color: var(--text-color); font-weight: bold;">1.00</span></div>
+            <h1>Configuration</h1>
             
-            <div class="input-group">
-                <label>x = -2</label>
-                <input type="range" id="w1" min="0" max="100" value="10" oninput="updateCharts()">
-                <div class="val-display" id="v1">0.10</div>
+            <p style="font-size: 14px; margin-bottom: 5px; font-weight: bold;">Select Problem Setup:</p>
+            <div class="toggle-group">
+                <button class="toggle-btn active" id="btnTask1" onclick="setTask(1)">Task 1 (PMF)</button>
+                <button class="toggle-btn" id="btnTask2" onclick="setTask(2)">Task 2 (CDF)</button>
             </div>
-            <div class="input-group">
-                <label>x = 0</label>
-                <input type="range" id="w2" min="0" max="100" value="25" oninput="updateCharts()">
-                <div class="val-display" id="v2">0.25</div>
+
+            <p style="font-size: 14px; margin-bottom: 5px; font-weight: bold;">Select Interaction Mode:</p>
+            <div class="toggle-group">
+                <button class="toggle-btn active" id="btnModePMF" onclick="setMode('PMF')">PMF Modifiers</button>
+                <button class="toggle-btn" id="btnModeCDF" onclick="setMode('CDF')">CDF Jumps</button>
             </div>
-            <div class="input-group">
-                <label>x = 1</label>
-                <input type="range" id="w3" min="0" max="100" value="30" oninput="updateCharts()">
-                <div class="val-display" id="v3">0.30</div>
+            
+            <div id="pmfInput" class="mode-container active">
+                <p class="subtitle">Adjust the PMF relative weights. Probabilities will auto-normalize so they always sum to 1.00.</p>
+                
+                <div class="input-group">
+                    <label id="label_w1">x = 0</label>
+                    <input type="range" id="w1" min="0" max="100" value="10" oninput="onPMFMoved()">
+                    <div class="val-display" id="v1">0.10</div>
+                </div>
+                <div class="input-group">
+                    <label id="label_w2">x = 0</label>
+                    <input type="range" id="w2" min="0" max="100" value="25" oninput="onPMFMoved()">
+                    <div class="val-display" id="v2">0.25</div>
+                </div>
+                <div class="input-group">
+                    <label id="label_w3">x = 0</label>
+                    <input type="range" id="w3" min="0" max="100" value="30" oninput="onPMFMoved()">
+                    <div class="val-display" id="v3">0.30</div>
+                </div>
+                <div class="input-group">
+                    <label id="label_w4">x = 0</label>
+                    <input type="range" id="w4" min="0" max="100" value="20" oninput="onPMFMoved()">
+                    <div class="val-display" id="v4">0.20</div>
+                </div>
+                <div class="input-group">
+                    <label id="label_w5">x = 0</label>
+                    <input type="range" id="w5" min="0" max="100" value="15" oninput="onPMFMoved()">
+                    <div class="val-display" id="v5">0.15</div>
+                </div>
             </div>
-            <div class="input-group">
-                <label>x = 3</label>
-                <input type="range" id="w4" min="0" max="100" value="20" oninput="updateCharts()">
-                <div class="val-display" id="v4">0.20</div>
-            </div>
-            <div class="input-group">
-                <label>x = 5</label>
-                <input type="range" id="w5" min="0" max="100" value="15" oninput="updateCharts()">
-                <div class="val-display" id="v5">0.15</div>
+
+            <div id="cdfInput" class="mode-container">
+                <p class="subtitle">Adjust the CDF accumulation steps explicitly. Sliders auto-constrain to prevent paradoxical overlaps!</p>
+                
+                <div class="input-group">
+                    <label id="label_c1">x = 0</label>
+                    <input type="range" id="c1" min="0" max="100" value="10" oninput="onCDFMoved(1)">
+                    <div class="val-display" id="cv1">0.10</div>
+                </div>
+                <div class="input-group">
+                    <label id="label_c2">x = 0</label>
+                    <input type="range" id="c2" min="0" max="100" value="35" oninput="onCDFMoved(2)">
+                    <div class="val-display" id="cv2">0.35</div>
+                </div>
+                <div class="input-group">
+                    <label id="label_c3">x = 0</label>
+                    <input type="range" id="c3" min="0" max="100" value="65" oninput="onCDFMoved(3)">
+                    <div class="val-display" id="cv3">0.65</div>
+                </div>
+                <div class="input-group">
+                    <label id="label_c4">x = 0</label>
+                    <input type="range" id="c4" min="0" max="100" value="85" oninput="onCDFMoved(4)">
+                    <div class="val-display" id="cv4">0.85</div>
+                </div>
+                <div class="input-group" style="opacity: 0.5; pointer-events: none;">
+                    <label id="label_c5">x = 0</label>
+                    <input type="range" id="c5" min="0" max="100" value="100">
+                    <div class="val-display" id="cv5">1.00</div>
+                </div>
             </div>
 
             <div class="info-box">
                 <strong style="font-size: 1.1rem; color: var(--accent-primary);">Probability Calculator</strong><br>
-                <div style="margin-top: 10px; font-family: monospace; font-size: 1.05rem;">
-                    P(X = 1) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <span id="calcPx1">0.30</span><br>
-                    P(X &le; 1) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <span id="calcPl1">0.65</span><br>
-                    P(X &lt; 1) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <span id="calcPlt1">0.35</span><br>
-                    P(0 &lt; X &le; 3) = <span id="calcP03">0.50</span>
+                <div style="margin-top: 10px; font-family: monospace; font-size: 1.05rem;" id="calcBox">
+                    <!-- Populated dynamically -->
                 </div>
             </div>
         </div>
@@ -181,6 +257,16 @@
 
     <script>
         let pmfChart, cdfChart;
+        let currentTask = 1;
+
+        // Base states
+        let t1_x = [-2, 0, 1, 3, 5];
+        let t1_p = [0.10, 0.25, 0.30, 0.20, 0.15];
+        let t2_x = [-1, 0, 2, 4, 6];
+        let t2_p = [0.15, 0.20, 0.25, 0.25, 0.15];
+
+        let P = [...t1_p];
+        let X = [...t1_x];
 
         Chart.defaults.color = '#e2e8f0';
         Chart.defaults.font.family = 'Inter';
@@ -192,7 +278,7 @@
             pmfChart = new Chart(ctxPMF, {
                 type: 'bar',
                 data: {
-                    labels: [-3, -2, -1, 0, 1, 2, 3, 4, 5, 6],
+                    labels: [-3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7],
                     datasets: [{
                         label: 'P(X = x)',
                         data: [],
@@ -217,7 +303,7 @@
             cdfChart = new Chart(ctxCDF, {
                 type: 'line',
                 data: {
-                    labels: [-3, -2, -1, 0, 1, 2, 3, 4, 5, 6],
+                    labels: [-3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7],
                     datasets: [{
                         label: 'F(x) = P(X ≤ x)',
                         data: [],
@@ -225,7 +311,7 @@
                         backgroundColor: 'rgba(236, 72, 153, 0.1)',
                         borderWidth: 3,
                         fill: true,
-                        stepped: true, // true equivalent to 'before' usually, draws horizontal then vertical jumps
+                        stepped: true,
                         pointBackgroundColor: '#ec4899',
                         pointRadius: 4
                     }]
@@ -244,7 +330,37 @@
             });
         }
 
-        function updateCharts() {
+        function setTask(task) {
+            currentTask = task;
+            document.getElementById('btnTask1').classList.remove('active');
+            document.getElementById('btnTask2').classList.remove('active');
+            document.getElementById('btnTask' + task).classList.add('active');
+
+            if(task === 1) {
+                X = [...t1_x];
+                P = [...t1_p];
+            } else {
+                X = [...t2_x];
+                P = [...t2_p];
+            }
+            syncVisuals();
+        }
+
+        function setMode(mode) {
+            document.getElementById('btnModePMF').classList.remove('active');
+            document.getElementById('btnModeCDF').classList.remove('active');
+            document.getElementById('btnMode' + mode).classList.add('active');
+
+            if(mode === 'PMF') {
+                document.getElementById('pmfInput').classList.add('active');
+                document.getElementById('cdfInput').classList.remove('active');
+            } else {
+                document.getElementById('pmfInput').classList.remove('active');
+                document.getElementById('cdfInput').classList.add('active');
+            }
+        }
+
+        function onPMFMoved() {
             let w = [
                 parseInt(document.getElementById('w1').value),
                 parseInt(document.getElementById('w2').value),
@@ -252,58 +368,142 @@
                 parseInt(document.getElementById('w4').value),
                 parseInt(document.getElementById('w5').value)
             ];
-            
-            let sum = w.reduce((a, b) => a + b, 0);
+            let sum = w.reduce((a,b)=>a+b, 0);
             if(sum === 0) { w[0] = 1; sum = 1; document.getElementById('w1').value = 1; }
-            
-            let p = w.map(val => val / sum);
-            
-            document.getElementById('v1').innerText = p[0].toFixed(2);
-            document.getElementById('v2').innerText = p[1].toFixed(2);
-            document.getElementById('v3').innerText = p[2].toFixed(2);
-            document.getElementById('v4').innerText = p[3].toFixed(2);
-            document.getElementById('v5').innerText = p[4].toFixed(2);
-            let displaySum = p.reduce((a,b)=>a+b, 0).toFixed(2);
-            document.getElementById('sumDisplay').innerText = displaySum;
+            P = w.map(v => v/sum);
+            syncVisuals();
+        }
 
-            let fullX = [-3, -2, -1, 0, 1, 2, 3, 4, 5, 6];
-            let pmfData = new Array(10).fill(0);
-            pmfData[1] = p[0]; 
-            pmfData[3] = p[1]; 
-            pmfData[4] = p[2]; 
-            pmfData[6] = p[3]; 
-            pmfData[8] = p[4]; 
+        function onCDFMoved(idx) {
+            let c1 = parseInt(document.getElementById('c1').value);
+            let c2 = parseInt(document.getElementById('c2').value);
+            let c3 = parseInt(document.getElementById('c3').value);
+            let c4 = parseInt(document.getElementById('c4').value);
+            
+            if(idx === 1) { if(c1 > c2) { document.getElementById('c2').value = c1; onCDFMoved(2); } }
+            if(idx === 2) {
+                if(c2 < c1) { document.getElementById('c1').value = c2; }
+                if(c2 > c3) { document.getElementById('c3').value = c2; onCDFMoved(3); }
+            }
+            if(idx === 3) {
+                if(c3 < c2) { document.getElementById('c2').value = c3; onCDFMoved(2); }
+                if(c3 > c4) { document.getElementById('c4').value = c3; onCDFMoved(4); }
+            }
+            if(idx === 4) { if(c4 < c3) { document.getElementById('c3').value = c4; onCDFMoved(3); } }
+            
+            c1 = parseInt(document.getElementById('c1').value);
+            c2 = parseInt(document.getElementById('c2').value);
+            c3 = parseInt(document.getElementById('c3').value);
+            c4 = parseInt(document.getElementById('c4').value);
+            
+            P[0] = c1 / 100;
+            P[1] = (c2 - c1) / 100;
+            P[2] = (c3 - c2) / 100;
+            P[3] = (c4 - c3) / 100;
+            P[4] = (100 - c4) / 100;
+            
+            syncVisuals();
+        }
+
+        function syncVisuals() {
+            // Update Text Labels
+            for(let i=0; i<5; i++) {
+                document.getElementById('v' + (i+1)).innerText = P[i].toFixed(2);
+                document.getElementById('label_w' + (i+1)).innerText = `x = ${X[i]}`;
+                document.getElementById('label_c' + (i+1)).innerText = `x = ${X[i]}`;
+            }
+
+            // Calculate exact CDF bounds
+            let c1 = P[0];
+            let c2 = P[0] + P[1];
+            let c3 = P[0] + P[1] + P[2];
+            let c4 = P[0] + P[1] + P[2] + P[3];
+
+            document.getElementById('cv1').innerText = c1.toFixed(2);
+            document.getElementById('cv2').innerText = c2.toFixed(2);
+            document.getElementById('cv3').innerText = c3.toFixed(2);
+            document.getElementById('cv4').innerText = c4.toFixed(2);
+
+            // Sync range slider positions (using weights relative for w)
+            // PMF logic: map p back to weights 0-100
+            document.getElementById('w1').value = Math.round(P[0]*100);
+            document.getElementById('w2').value = Math.round(P[1]*100);
+            document.getElementById('w3').value = Math.round(P[2]*100);
+            document.getElementById('w4').value = Math.round(P[3]*100);
+            document.getElementById('w5').value = Math.round(P[4]*100);
+            
+            // CDF logic: set constrained sliders natively
+            document.getElementById('c1').value = Math.round(c1*100);
+            document.getElementById('c2').value = Math.round(c2*100);
+            document.getElementById('c3').value = Math.round(c3*100);
+            document.getElementById('c4').value = Math.round(c4*100);
+
+            drawCharts();
+            drawCalc();
+        }
+
+        function drawCharts() {
+            let fullX = [-3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7];
+            let pmfData = new Array(11).fill(0);
+            
+            // Map our X to fullX array indices safely
+            for(let i=0; i<5; i++) {
+                let idx = fullX.indexOf(X[i]);
+                if(idx !== -1) pmfData[idx] = P[i];
+            }
             
             pmfChart.data.datasets[0].data = pmfData;
-            
-            // Adjust y-axis max dynamically for PMF if a single probability goes too high
-            let maxP = Math.max(...p);
+            let maxP = Math.max(...P);
             pmfChart.options.scales.y.max = maxP > 0.8 ? 1.0 : (maxP > 0.4 ? maxP + 0.1 : 0.5);
             pmfChart.update();
 
             let cdfData = [];
             let currentF = 0;
             for(let i = 0; i < fullX.length; i++) {
-                if(fullX[i] === -2) currentF += p[0];
-                if(fullX[i] === 0) currentF += p[1];
-                if(fullX[i] === 1) currentF += p[2];
-                if(fullX[i] === 3) currentF += p[3];
-                if(fullX[i] === 5) currentF += p[4];
+                let idx = X.indexOf(fullX[i]);
+                if(idx !== -1) currentF += P[idx];
                 cdfData.push(currentF);
             }
             
             cdfChart.data.datasets[0].data = cdfData;
             cdfChart.update();
+        }
 
-            document.getElementById('calcPx1').innerText = p[2].toFixed(2);
-            document.getElementById('calcPl1').innerText = cdfData[4].toFixed(2); 
-            document.getElementById('calcPlt1').innerText = (cdfData[4] - p[2]).toFixed(2); 
-            document.getElementById('calcP03').innerText = (p[2] + p[3]).toFixed(2); 
+        function drawCalc() {
+            let html = "";
+            if (currentTask === 1) {
+                let p1 = P[2]; // X=1
+                let cdf1 = P[0] + P[1] + P[2]; 
+                let lt1 = P[0] + P[1]; 
+                let p03 = P[2] + P[3]; // X=1, X=3
+                
+                html = `
+                    P(X = 1)  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <span style="color:var(--accent-secondary)">${p1.toFixed(2)}</span><br>
+                    P(X &le; 1)  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <span style="color:var(--accent-secondary)">${cdf1.toFixed(2)}</span><br>
+                    P(X &lt; 1)  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <span style="color:var(--accent-secondary)">${lt1.toFixed(2)}</span><br>
+                    P(0 &lt; X &le; 3) = <span style="color:var(--accent-secondary)">${p03.toFixed(2)}</span>
+                `;
+            } else {
+                let px2 = P[2]; // X=2
+                let cdf2 = P[0] + P[1] + P[2]; // F(2)
+                let plt2 = P[0] + P[1]; // F(0)
+                let p04 = P[2] + P[3]; // X=2 + X=4
+                let pgt2 = P[3] + P[4]; // X=4 + X=6
+
+                html = `
+                    P(X = 2)  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <span style="color:var(--accent-secondary)">${px2.toFixed(2)}</span><br>
+                    P(X &le; 2)  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <span style="color:var(--accent-secondary)">${cdf2.toFixed(2)}</span><br>
+                    P(X &lt; 2)  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <span style="color:var(--accent-secondary)">${plt2.toFixed(2)}</span><br>
+                    P(0 &lt; X &le; 4) = <span style="color:var(--accent-secondary)">${p04.toFixed(2)}</span><br>
+                    P(X &gt; 2)  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <span style="color:var(--accent-secondary)">${pgt2.toFixed(2)}</span>
+                `;
+            }
+            document.getElementById('calcBox').innerHTML = html;
         }
 
         window.onload = () => {
             initCharts();
-            updateCharts();
+            setTask(1); // will call syncVisuals -> updateCharts
         };
     </script>
 </body>
