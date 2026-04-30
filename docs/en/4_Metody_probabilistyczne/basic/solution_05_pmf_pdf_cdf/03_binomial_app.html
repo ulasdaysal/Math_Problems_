@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binomial Distribution Interactive Comparator</title>
+    <!-- Use Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f111a;
+            --panel-bg: #1e2130;
+            --text-color: #e2e8f0;
+            --dist1-color: #8b5cf6;
+            --dist1-bg: rgba(139, 92, 246, 0.5);
+            --dist2-color: #ec4899;
+            --dist2-bg: rgba(236, 72, 153, 0.5);
+            --border-color: #2d3748;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1000px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-top: 0;
+            background: linear-gradient(to right, var(--dist1-color), var(--dist2-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 0.9rem;
+            color: #9ca3af;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .dist-config {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            border-radius: 8px;
+            background: #151824;
+            border-left: 4px solid;
+        }
+
+        .dist1-config { border-left-color: var(--dist1-color); }
+        .dist2-config { border-left-color: var(--dist2-color); }
+
+        .dist-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        .dist1-title { color: var(--dist1-color); }
+        .dist2-title { color: var(--dist2-color); }
+
+        .input-group {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            width: 40px;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            margin: 0 1rem;
+        }
+        
+        .c-ds1 { accent-color: var(--dist1-color); }
+        .c-ds2 { accent-color: var(--dist2-color); }
+
+        .val-display {
+            width: 40px;
+            text-align: right;
+            font-family: monospace;
+            font-size: 1rem;
+        }
+
+        .charts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+        
+        .calc-panel {
+            background: #11131c;
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .calc-header { margin-top: 0; font-family: 'Inter', sans-serif; font-size: 1rem; color: #fff;}
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Controls Panel -->
+        <div class="panel">
+            <h1>Binomial $\mathit{Bin}(n, p)$</h1>
+            <p class="subtitle">Visually compare two Binomial distributions to see how parameters shape the mass.</p>
+            
+            <!-- Dist 1 -->
+            <div class="dist-config dist1-config">
+                <div class="dist-title dist1-title">Distribution 1</div>
+                
+                <div class="input-group">
+                    <label>n =</label>
+                    <input type="range" class="c-ds1" id="n1" min="1" max="100" value="20" oninput="updateAll()">
+                    <div class="val-display" id="v_n1">20</div>
+                </div>
+                <div class="input-group">
+                    <label>p =</label>
+                    <input type="range" class="c-ds1" id="p1" min="0" max="100" value="50" oninput="updateAll()">
+                    <div class="val-display" id="v_p1">0.50</div>
+                </div>
+            </div>
+
+            <!-- Dist 2 -->
+            <div class="dist-config dist2-config">
+                <div class="dist-title dist2-title">Distribution 2</div>
+                
+                <div class="input-group">
+                    <label>n =</label>
+                    <input type="range" class="c-ds2" id="n2" min="1" max="100" value="40" oninput="updateAll()">
+                    <div class="val-display" id="v_n2">40</div>
+                </div>
+                <div class="input-group">
+                    <label>p =</label>
+                    <input type="range" class="c-ds2" id="p2" min="0" max="100" value="30" oninput="updateAll()">
+                    <div class="val-display" id="v_p2">0.30</div>
+                </div>
+            </div>
+            
+            <div class="calc-panel">
+                <h3 class="calc-header">Distribution 1 Metrics</h3>
+                Expected Value (μ) = <span id="m_mu1" style="color:var(--dist1-color)">0</span><br>
+                Variance (σ²) = <span id="m_var1" style="color:var(--dist1-color)">0</span><br>
+                <br>
+                <h3 class="calc-header">Distribution 2 Metrics</h3>
+                Expected Value (μ) = <span id="m_mu2" style="color:var(--dist2-color)">0</span><br>
+                Variance (σ²) = <span id="m_var2" style="color:var(--dist2-color)">0</span>
+            </div>
+
+        </div>
+
+        <!-- Charts Panel -->
+        <div class="charts-container">
+            <div class="panel">
+                <h1 style="font-size: 1.2rem; background: none; color: #fff; -webkit-text-fill-color: #fff;">Probability Mass Function (PMF)</h1>
+                <div class="chart-wrapper">
+                    <canvas id="pmfChart"></canvas>
+                </div>
+            </div>
+            <div class="panel">
+                <h1 style="font-size: 1.2rem; background: none; color: #fff; -webkit-text-fill-color: #fff;">Cumulative Distribution Function (CDF)</h1>
+                <div class="chart-wrapper">
+                    <canvas id="cdfChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pmfChart, cdfChart;
+
+        Chart.defaults.color = '#e2e8f0';
+        Chart.defaults.font.family = 'Inter';
+
+        function computeBinomial(n, p) {
+            let pmf = new Array(n + 1).fill(0);
+            pmf[0] = Math.pow(1 - p, n);
+            
+            for (let k = 1; k <= n; k++) {
+                if(p === 1.0) { pmf[k] = (k===n)?1:0; continue; }
+                if(p === 0.0) { pmf[k] = (k===0)?1:0; continue; }
+                pmf[k] = pmf[k-1] * ((n - k + 1) / k) * (p / (1 - p));
+            }
+            if(p === 0.0) pmf[0] = 1.0;
+            if(p === 1.0) pmf[n] = 1.0;
+            
+            let cdf = new Array(n + 1).fill(0);
+            let run = 0;
+            for (let k = 0; k <= n; k++) {
+                run += pmf[k];
+                cdf[k] = run;
+            }
+            cdf[n] = 1.0; // clamp floating point issues
+            return { pmf, cdf };
+        }
+
+        function initCharts() {
+            const ctxPMF = document.getElementById('pmfChart').getContext('2d');
+            const ctxCDF = document.getElementById('cdfChart').getContext('2d');
+
+            pmfChart = new Chart(ctxPMF, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Dist 1 PMF',
+                            data: [],
+                            backgroundColor: 'rgba(139, 92, 246, 0.7)',
+                            borderColor: '#8b5cf6',
+                            borderWidth: 1,
+                            barPercentage: 0.8,
+                            categoryPercentage: 0.9
+                        },
+                        {
+                            label: 'Dist 2 PMF',
+                            data: [],
+                            backgroundColor: 'rgba(236, 72, 153, 0.7)',
+                            borderColor: '#ec4899',
+                            borderWidth: 1,
+                            barPercentage: 0.8,
+                            categoryPercentage: 0.9
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#2d3748' } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: { tooltip: { mode: 'index', intersect: false } }
+                }
+            });
+
+            cdfChart = new Chart(ctxCDF, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Dist 1 CDF',
+                            data: [],
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'transparent',
+                            borderWidth: 3,
+                            stepped: true,
+                            pointRadius: 2,
+                            pointBackgroundColor: '#8b5cf6'
+                        },
+                        {
+                            label: 'Dist 2 CDF',
+                            data: [],
+                            borderColor: '#ec4899',
+                            backgroundColor: 'transparent',
+                            borderWidth: 3,
+                            stepped: true,
+                            pointRadius: 2,
+                            pointBackgroundColor: '#ec4899'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 1.05, grid: { color: '#2d3748' } },
+                        x: { grid: { color: '#2d3748' } }
+                    },
+                    plugins: { tooltip: { mode: 'index', intersect: false } }
+                }
+            });
+        }
+
+        function updateAll() {
+            let n1 = parseInt(document.getElementById('n1').value);
+            let p1 = parseInt(document.getElementById('p1').value) / 100;
+            let n2 = parseInt(document.getElementById('n2').value);
+            let p2 = parseInt(document.getElementById('p2').value) / 100;
+
+            document.getElementById('v_n1').innerText = n1;
+            document.getElementById('v_p1').innerText = p1.toFixed(2);
+            document.getElementById('v_n2').innerText = n2;
+            document.getElementById('v_p2').innerText = p2.toFixed(2);
+            
+            // Metrics
+            document.getElementById('m_mu1').innerText = (n1*p1).toFixed(2);
+            document.getElementById('m_var1').innerText = (n1*p1*(1-p1)).toFixed(2);
+            document.getElementById('m_mu2').innerText = (n2*p2).toFixed(2);
+            document.getElementById('m_var2').innerText = (n2*p2*(1-p2)).toFixed(2);
+
+            let dist1 = computeBinomial(n1, p1);
+            let dist2 = computeBinomial(n2, p2);
+
+            let maxN = Math.max(n1, n2);
+            
+            // dynamically create x-axis labels
+            let labels = [];
+            for (let i = 0; i <= maxN + 1; i++) {
+                labels.push(i);
+            }
+
+            // Align data arrays to the shared maxN domain
+            let alignedPMF1 = new Array(maxN + 2).fill(null);
+            let alignedPMF2 = new Array(maxN + 2).fill(null);
+            let alignedCDF1 = new Array(maxN + 2).fill(null);
+            let alignedCDF2 = new Array(maxN + 2).fill(null);
+
+            for(let i=0; i<=maxN+1; i++) {
+                // For PMF, put 0 if it's past the edge
+                alignedPMF1[i] = (i <= n1) ? dist1.pmf[i] : 0;
+                alignedPMF2[i] = (i <= n2) ? dist2.pmf[i] : 0;
+                
+                // For CDF, put 1.0 explicitly if it's past the edge (so the line carries smoothly to the end of the chart)
+                alignedCDF1[i] = (i <= n1) ? dist1.cdf[i] : 1.0;
+                alignedCDF2[i] = (i <= n2) ? dist2.cdf[i] : 1.0;
+            }
+
+            pmfChart.data.labels = labels;
+            pmfChart.data.datasets[0].data = alignedPMF1;
+            pmfChart.data.datasets[1].data = alignedPMF2;
+            pmfChart.update();
+
+            cdfChart.data.labels = labels;
+            cdfChart.data.datasets[0].data = alignedCDF1;
+            cdfChart.data.datasets[1].data = alignedCDF2;
+            cdfChart.update();
+        }
+
+        window.onload = () => {
+            initCharts();
+            updateAll();
+        };
+    </script>
+</body>
+</html>
