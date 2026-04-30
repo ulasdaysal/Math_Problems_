@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistical Families: Interactive Comparator</title>
+    <!-- Use Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f111a;
+            --panel-bg: #1e2130;
+            --text-color: #e2e8f0;
+            --dist1-color: #8b5cf6;
+            --dist1-bg: rgba(139, 92, 246, 0.5);
+            --dist2-color: #ec4899;
+            --dist2-bg: rgba(236, 72, 153, 0.5);
+            --border-color: #2d3748;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1000px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-top: 0;
+            background: linear-gradient(to right, var(--dist1-color), var(--dist2-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 0.9rem;
+            color: #9ca3af;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .dist-config {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            border-radius: 8px;
+            background: #151824;
+            border-left: 4px solid;
+            transition: all 0.3s;
+        }
+
+        .dist1-config { border-left-color: var(--dist1-color); }
+        .dist2-config { border-left-color: var(--dist2-color); }
+
+        .dist-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .dist1-title { color: var(--dist1-color); }
+        .dist2-title { color: var(--dist2-color); }
+
+        select {
+            background: #2d3748;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            width: 40px;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            margin: 0 1rem;
+        }
+        
+        .c-ds1 { accent-color: var(--dist1-color); }
+        .c-ds2 { accent-color: var(--dist2-color); }
+
+        .val-display {
+            width: 40px;
+            text-align: right;
+            font-family: monospace;
+            font-size: 1rem;
+        }
+
+        .charts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+        
+        .calc-panel {
+            background: #11131c;
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .calc-header { margin-top: 0; font-family: 'Inter', sans-serif; font-size: 1rem; color: #fff;}
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Controls Panel -->
+        <div class="panel">
+            <h1>Statistical Families</h1>
+            <p class="subtitle">Overlay and compare Binomial and Geometric distributions dynamically.</p>
+            
+            <!-- Dist 1 -->
+            <div class="dist-config dist1-config">
+                <div class="dist-title dist1-title">
+                    Dist 1
+                    <select id="type1" onchange="updateUI()">
+                        <option value="binom" selected>Bin(n, p)</option>
+                        <option value="geom">Geo(p)</option>
+                    </select>
+                </div>
+                
+                <div class="input-group" id="grp_n1">
+                    <label>n =</label>
+                    <input type="range" class="c-ds1" id="n1" min="1" max="100" value="20" oninput="updateAll()">
+                    <div class="val-display" id="v_n1">20</div>
+                </div>
+                <div class="input-group">
+                    <label>p =</label>
+                    <input type="range" class="c-ds1" id="p1" min="1" max="100" value="50" oninput="updateAll()">
+                    <div class="val-display" id="v_p1">0.50</div>
+                </div>
+            </div>
+
+            <!-- Dist 2 -->
+            <div class="dist-config dist2-config">
+                <div class="dist-title dist2-title">
+                    Dist 2
+                    <select id="type2" onchange="updateUI()">
+                        <option value="binom">Bin(n, p)</option>
+                        <option value="geom" selected>Geo(p)</option>
+                    </select>
+                </div>
+                
+                <div class="input-group" id="grp_n2">
+                    <label>n =</label>
+                    <input type="range" class="c-ds2" id="n2" min="1" max="100" value="40" oninput="updateAll()">
+                    <div class="val-display" id="v_n2">40</div>
+                </div>
+                <div class="input-group">
+                    <label>p =</label>
+                    <input type="range" class="c-ds2" id="p2" min="1" max="100" value="20" oninput="updateAll()">
+                    <div class="val-display" id="v_p2">0.20</div>
+                </div>
+            </div>
+            
+            <div class="calc-panel">
+                <h3 class="calc-header">Distribution 1 Metrics</h3>
+                Expected Value (μ) = <span id="m_mu1" style="color:var(--dist1-color)">0</span><br>
+                Variance (σ²) = <span id="m_var1" style="color:var(--dist1-color)">0</span><br>
+                <br>
+                <h3 class="calc-header">Distribution 2 Metrics</h3>
+                Expected Value (μ) = <span id="m_mu2" style="color:var(--dist2-color)">0</span><br>
+                Variance (σ²) = <span id="m_var2" style="color:var(--dist2-color)">0</span>
+            </div>
+        </div>
+
+        <!-- Charts Panel -->
+        <div class="charts-container">
+            <div class="panel">
+                <h1 style="font-size: 1.2rem; background: none; color: #fff; -webkit-text-fill-color: #fff;">Probability Mass Function (PMF)</h1>
+                <div class="chart-wrapper">
+                    <canvas id="pmfChart"></canvas>
+                </div>
+            </div>
+            <div class="panel">
+                <h1 style="font-size: 1.2rem; background: none; color: #fff; -webkit-text-fill-color: #fff;">Cumulative Distribution Function (CDF)</h1>
+                <div class="chart-wrapper">
+                    <canvas id="cdfChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pmfChart, cdfChart;
+
+        Chart.defaults.color = '#e2e8f0';
+        Chart.defaults.font.family = 'Inter';
+
+        function computeBinomial(n, p, maxX) {
+            let pmf = new Array(maxX + 1).fill(0);
+            pmf[0] = Math.pow(1 - p, n);
+            
+            for (let k = 1; k <= Math.min(n, maxX); k++) {
+                if(p === 1.0) { pmf[k] = (k===n)?1:0; continue; }
+                if(p === 0.0) { pmf[k] = (k===0)?1:0; continue; }
+                pmf[k] = pmf[k-1] * ((n - k + 1) / k) * (p / (1 - p));
+            }
+            if(p === 0.0) pmf[0] = 1.0;
+            if(p === 1.0) { pmf.fill(0); if(n <= maxX) pmf[n] = 1.0; }
+            
+            let cdf = new Array(maxX + 1).fill(0);
+            let run = 0;
+            for (let k = 0; k <= maxX; k++) {
+                if (k <= n) run += pmf[k];
+                cdf[k] = run;
+            }
+            for(let k=n; k<=maxX; k++) cdf[k] = 1.0;
+            return { pmf, cdf };
+        }
+
+        function computeGeometric(p, maxX) {
+            // Support starts at 1. Index 0 is strictly 0.
+            let pmf = new Array(maxX + 1).fill(0);
+            pmf[0] = 0;
+            
+            for (let k = 1; k <= maxX; k++) {
+                pmf[k] = Math.pow(1 - p, k - 1) * p;
+            }
+            
+            let cdf = new Array(maxX + 1).fill(0);
+            for (let k = 1; k <= maxX; k++) {
+                cdf[k] = 1 - Math.pow(1 - p, k);
+            }
+            return { pmf, cdf };
+        }
+
+        function initCharts() {
+            const ctxPMF = document.getElementById('pmfChart').getContext('2d');
+            const ctxCDF = document.getElementById('cdfChart').getContext('2d');
+
+            pmfChart = new Chart(ctxPMF, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Dist 1 PMF',
+                            data: [],
+                            backgroundColor: 'rgba(139, 92, 246, 0.7)',
+                            borderColor: '#8b5cf6',
+                            borderWidth: 1,
+                            barPercentage: 0.8,
+                            categoryPercentage: 0.9
+                        },
+                        {
+                            label: 'Dist 2 PMF',
+                            data: [],
+                            backgroundColor: 'rgba(236, 72, 153, 0.7)',
+                            borderColor: '#ec4899',
+                            borderWidth: 1,
+                            barPercentage: 0.8,
+                            categoryPercentage: 0.9
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#2d3748' } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: { tooltip: { mode: 'index', intersect: false } }
+                }
+            });
+
+            cdfChart = new Chart(ctxCDF, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Dist 1 CDF',
+                            data: [],
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'transparent',
+                            borderWidth: 3,
+                            stepped: true,
+                            pointRadius: 2,
+                            pointBackgroundColor: '#8b5cf6'
+                        },
+                        {
+                            label: 'Dist 2 CDF',
+                            data: [],
+                            borderColor: '#ec4899',
+                            backgroundColor: 'transparent',
+                            borderWidth: 3,
+                            stepped: true,
+                            pointRadius: 2,
+                            pointBackgroundColor: '#ec4899'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 1.05, grid: { color: '#2d3748' } },
+                        x: { grid: { color: '#2d3748' } }
+                    },
+                    plugins: { tooltip: { mode: 'index', intersect: false } }
+                }
+            });
+        }
+
+        function updateUI() {
+            let t1 = document.getElementById('type1').value;
+            let t2 = document.getElementById('type2').value;
+
+            if(t1 === 'geom') document.getElementById('grp_n1').classList.add('hidden');
+            else document.getElementById('grp_n1').classList.remove('hidden');
+
+            if(t2 === 'geom') document.getElementById('grp_n2').classList.add('hidden');
+            else document.getElementById('grp_n2').classList.remove('hidden');
+
+            updateAll();
+        }
+
+        function updateAll() {
+            let t1 = document.getElementById('type1').value;
+            let t2 = document.getElementById('type2').value;
+
+            let n1 = parseInt(document.getElementById('n1').value);
+            let p1 = parseInt(document.getElementById('p1').value) / 100;
+            let n2 = parseInt(document.getElementById('n2').value);
+            let p2 = parseInt(document.getElementById('p2').value) / 100;
+
+            document.getElementById('v_n1').innerText = n1;
+            document.getElementById('v_p1').innerText = p1.toFixed(2);
+            document.getElementById('v_n2').innerText = n2;
+            document.getElementById('v_p2').innerText = p2.toFixed(2);
+            
+            // Generate max domain length
+            // If binom, max is near n. If geom, max is where tail dies (roughly 3/p to hit 95% CDF).
+            let max1 = (t1 === 'binom') ? n1 : Math.min(80, Math.ceil(4 / p1));
+            let max2 = (t2 === 'binom') ? n2 : Math.min(80, Math.ceil(4 / p2));
+            let globalMaxX = Math.max(10, max1, max2);
+            // Cap to heavily prevent unbounded UI overflow
+            globalMaxX = Math.min(globalMaxX, 100);
+
+            // Metrics
+            let mu1 = (t1 === 'binom') ? (n1 * p1) : (1 / p1);
+            let var1 = (t1 === 'binom') ? (n1 * p1 * (1 - p1)) : ((1 - p1) / (p1 * p1));
+            document.getElementById('m_mu1').innerText = (t1==='geom' && p1===0)?'∞':mu1.toFixed(2);
+            document.getElementById('m_var1').innerText = (t1==='geom' && p1===0)?'∞':var1.toFixed(2);
+
+            let mu2 = (t2 === 'binom') ? (n2 * p2) : (1 / p2);
+            let var2 = (t2 === 'binom') ? (n2 * p2 * (1 - p2)) : ((1 - p2) / (p2 * p2));
+            document.getElementById('m_mu2').innerText = (t2==='geom' && p2===0)?'∞':mu2.toFixed(2);
+            document.getElementById('m_var2').innerText = (t2==='geom' && p2===0)?'∞':var2.toFixed(2);
+
+            // Compute
+            let dist1 = (t1 === 'binom') ? computeBinomial(n1, p1, globalMaxX) : computeGeometric(p1, globalMaxX);
+            let dist2 = (t2 === 'binom') ? computeBinomial(n2, p2, globalMaxX) : computeGeometric(p2, globalMaxX);
+
+            let labels = [];
+            for (let i = 0; i <= globalMaxX; i++) labels.push(i);
+
+            pmfChart.data.labels = labels;
+            pmfChart.data.datasets[0].data = dist1.pmf;
+            pmfChart.data.datasets[1].data = dist2.pmf;
+            pmfChart.update();
+
+            cdfChart.data.labels = labels;
+            cdfChart.data.datasets[0].data = dist1.cdf;
+            cdfChart.data.datasets[1].data = dist2.cdf;
+            cdfChart.update();
+        }
+
+        window.onload = () => {
+            initCharts();
+            updateUI(); // triggers updateAll
+        };
+    </script>
+</body>
+</html>
