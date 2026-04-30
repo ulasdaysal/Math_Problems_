@@ -76,13 +76,15 @@ Think of the CDF as a snowball rolling towards the right along the $x$-axis. As 
 * At $x = 5$: We accumulate the final $0.15$. New total $= 0.85 + 0.15 = 1.00$.
 
 So, formally:
-$$ F(x) = 
+
+$$ 
+F(x) = 
 \begin{cases} 
-0.00 & \text{for } x < -2 \\
-0.10 & \text{for } -2 \le x < 0 \\
-0.35 & \text{for } 0 \le x < 1 \\
-0.65 & \text{for } 1 \le x < 3 \\
-0.85 & \text{for } 3 \le x < 5 \\
+0.00 & \text{for } x < -2 \\\\
+0.10 & \text{for } -2 \le x < 0 \\\\
+0.35 & \text{for } 0 \le x < 1 \\\\
+0.65 & \text{for } 1 \le x < 3 \\\\
+0.85 & \text{for } 3 \le x < 5 \\\\
 1.00 & \text{for } x \ge 5 
 \end{cases} 
 $$
