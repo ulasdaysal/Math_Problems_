@@ -1,107 +1,81 @@
-# Problem 2 — Discrete Distribution Given by a CDF Table
+# Problem 2 — Discrete Distribution from CDF
 
-## Introduction 
-In Task 1, we started with individual "probability masses" (the PMF). This time, we are working backwards: we are given the "accumulated snowball" of probabilities (the **Cumulative Distribution Function**, or **CDF**) and must derive the corresponding rules underlying the experiment.
+## Input Data: The CDF Table
+The problem provides the following cumulative distribution values:
 
----
-
-## Part 1: The Probability Space and Random Variable
-
-### The Random Experiment
-Let us imagine a deck of **20 special cards** shuffled thoroughly. A player draws one card at random. The number printed on the card determines their payoff.
-
-### The Sample Space ($\Omega$)
-The **sample space** is simply the physical act of drawing one of the 20 distinct cards.
-$$ \Omega = \{ c_1, c_2, \dots, c_{20} \} $$
-
-### The Random Variable ($X$) and its Support
-The random variable $X$ maps the physical card to its numerical payoff. The problem gives us the points at which the CDF changes its values, which tells us exactly the possible numbers printed on the cards.
-$$ \text{Support of } X = \{-1, 0, 2, 4, 6\} $$
-
-By looking ahead at the jumps in the CDF (which we calculate in Part 2), we can establish exactly how many of each card exist in the deck:
-* 3 cards of value -1 ($3/20 = 0.15$)
-* 4 cards of value 0 ($4/20 = 0.20$)
-* 5 cards of value 2 ($5/20 = 0.25$)
-* 5 cards of value 4 ($5/20 = 0.25$)
-* 3 cards of value 6 ($3/20 = 0.15$)
-
----
-
-## Part 2: Reconstructing the PMF
-
-The CDF $F(x)$ shown in the table gives us the probability accumulated *up to and including* $x$.
-$F(x)$:
-* $x = -1 \implies 0.15$
-* $x = 0 \implies 0.35$
-* $x = 2 \implies 0.60$
-* $x = 4 \implies 0.85$
-* $x = 6 \implies 1.00$
-
-To find the individual probability masses $P(X=x)$ (the **PMF**), we simply calculate the difference between the current accumulated total and the previous total:
-
-1. **At $x = -1$:** It's the first jump. $P(X = -1) = 0.15 - 0.00 = 0.15$
-2. **At $x = 0$:** $P(X = 0) = F(0) - F(-1) = 0.35 - 0.15 = 0.20$
-3. **At $x = 2$:** $P(X = 2) = F(2) - F(0) = 0.60 - 0.35 = 0.25$
-4. **At $x = 4$:** $P(X = 4) = F(4) - F(2) = 0.85 - 0.60 = 0.25$
-5. **At $x = 6$:** $P(X = 6) = F(6) - F(4) = 1.00 - 0.85 = 0.15$
-
-**The Reconstructed PMF Table:**
 | $x$ | -1 | 0 | 2 | 4 | 6 |
-|---|---|---|---|---|---|
-| **$P(X = x)$** | 0.15 | 0.20 | 0.25 | 0.25 | 0.15 |
-
-*(You can verify this in the updated interactive HTML application!)*
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| **$F(x)$** | 0.15 | 0.35 | 0.60 | 0.85 | 1.00 |
 
 ---
 
-## Part 3: Identifying the Jumps
-
-**Where does the CDF jump?**
-The CDF jumps precisely at the values in the support: $x \in \{-1, 0, 2, 4, 6\}$. 
-
-**Why does jump size equal the probability?**
-The CDF $F(x)$ represents the total probability accumulated up to the number $x$. As our "snowball" rolls rightward along the number line, it picks up no extra snow (probability) if there are no values. Thus, the graph is a flat horizontal line. But the moment it rolls exactly over a possible value in our support, it instantly absorbs that value's specific probability mass. Graphically, this is expressed as an instant vertical "jump." Therefore, the height of the jump is strictly equal to the PMF at that value: $P(X=x) = F(x) - F(x^-)$.
+## 1. Probability Space and Random Variable
+A simple way to construct a finite probability space $\Omega$ is to use the values of $X$ as the outcomes. Let:
+- **Sample Space:** $\Omega = \{-1, 0, 2, 4, 6\}$
+- **Probability Measure:** $P(\omega)$ is the probability mass at each point (derived in Task 2).
+- **Random Variable:** $X(\omega) = \omega$ for all $\omega \in \Omega$.
 
 ---
 
-## Part 4: Computing Probabilities
-
-Let's compute probabilities **using only the CDF values**, without referring to our derived PMF table. For these examples, let's substitute target parameters $a = 2$ and $b = 4$.
-
-### 1. Less than or equal to: $P(X \le a)$
-**Target:** $P(X \le 2)$
-The CDF is defined as exactly this! We just read the value from the table.
-**Result:** $F(2) = 0.60$
-
-### 2. Strictly less than: $P(X < a)$
-**Target:** $P(X < 2)$
-To get the probability *strictly less* than 2, we must look at the accumulated value right before 2. In discrete distributions, this means evaluating the CDF at the largest support value prior to 2, which is 0.
-$P(X < 2) = F(0) = 0.35$
-**Result:** $0.35$
-
-### 3. Equality: $P(X = a)$
-**Target:** $P(X = 2)$
-We find the size of the jump exactly at $x=2$ by subtracting the CDF just prior to 2 from the CDF at 2.
-$P(X = 2) = F(2) - F(0) = 0.60 - 0.35 = 0.25$
-**Result:** $0.25$
-
-### 4. Interval: $P(a < X \le b)$
-**Target:** $P(0 < X \le 4)$
-To find the probability inside an interval open on the left and closed on the right, the absolute best tool is the CDF, which gives this instantly string via $F(b) - F(a)$.
-$F(4) - F(0) = 0.85 - 0.35 = 0.50$
-**Result:** $0.50$
-
-### 5. Strictly greater than: $P(X > a)$
-**Target:** $P(X > 2)$
-We use the complement rule. "Greater than 2" is the opposite of "Less than or equal to 2".
-$P(X > 2) = 1 - P(X \le 2) = 1 - F(2) = 1 - 0.60 = 0.40$
-**Result:** $0.40$
+> [!TIP]
+> **Interactive Visualization:** You can explore this distribution dynamically, adjust the jump sizes, and see the PMF/CDF relationship in the [Interactive Solution App](./02_discrete_app.html).
 
 ---
 
-## Part 5: Comparing PMF and CDF
+## 2. Reconstruct the PMF
+The PMF, $P(X=x)$, is found by calculating the "jumps" in the CDF: $P(X=x_i) = F(x_i) - F(x_{i-1})$.
 
-When solving practical problems, choosing between the PMF and the CDF depends entirely on the question you are being asked.
+| $x$ | $P(X=x)$ calculation | $P(X=x)$ |
+|:---:|:---|:---:|
+| -1 | $0.15 - 0$ | **0.15** |
+| 0 | $0.35 - 0.15$ | **0.20** |
+| 2 | $0.60 - 0.35$ | **0.25** |
+| 4 | $0.85 - 0.60$ | **0.25** |
+| 6 | $1.00 - 0.85$ | **0.15** |
 
-* **When to use PMF:** The PMF is immediate and explicitly clear when asking "What is the probability of exactly this outcome?" ($P(X=x)$). It is the building block. However, if asked for an interval or a "greater than" question, you are forced to do a lot of repetitive addition.
-* **When to use CDF:** The CDF is incredible at answering threshold questions ("less than or equal to") and interval boundaries ($P(a < X \le b)$) instantly with one subtraction. However, to find the probability of a single exact point, you have to subtract two adjacent CDF values instead of just reading a single number.
+## 3 & 4. Graphs of PMF and CDF
+- **PMF Graph:** A "spike" or "lollipop" chart where the height of the line at each $x$ matches the probabilities above.
+- **CDF Graph:** A step function (staircase). The graph is constant between values and "jumps" at $x = \{-1, 0, 2, 4, 6\}$. It is right-continuous, meaning the solid dot is on the left of each horizontal segment.
+
+## 5. Jump Points
+The CDF jumps at the values where $X$ has a non-zero probability. Based on the table, these points are:
+$x \in \{-1, 0, 2, 4, 6\}$
+
+## 6. Why Jump Size = Probability?
+By definition, $F(x) = P(X \le x)$. If we look at a specific point $a$:
+$$F(a) = P(X < a) + P(X = a)$$
+The value just before the jump is $F(a^-) = P(X < a)$. Therefore, the difference (the jump) is:
+$$F(a) - F(a^-) = P(X = a)$$
+
+## 7–12. Computing Probabilities
+Let's use example values (e.g., $a=2, b=4$) to demonstrate the logic:
+
+### 8. $P(X \le a)$
+This is exactly the definition of the CDF.
+**Example:** $P(X \le 2) = F(2) = \mathbf{0.60}$
+
+### 9. $P(X < a)$
+The value of the CDF immediately to the left of $a$.
+**Example:** $P(X < 2) = F(0) = \mathbf{0.35}$
+
+### 10. $P(X = a)$
+The jump size at $a$.
+**Example:** $P(X = 2) = 0.60 - 0.35 = \mathbf{0.25}$
+
+### 11. $P(a < X \le b)$
+The change in the CDF between the two points.
+**Example:** $P(0 < X \le 4) = F(4) - F(0) = 0.85 - 0.35 = \mathbf{0.50}$
+
+### 12. $P(X > a)$
+Using the complement rule.
+**Example:** $P(X > 2) = 1 - F(2) = 1 - 0.60 = \mathbf{0.40}$
+
+## 13. Comparison: PMF vs. CDF
+- **Immediate from PMF:** The individual probability of a specific outcome $P(X=x)$. It is easier to see the "mode" (most likely value) and the shape of the distribution's density.
+- **Immediate from CDF:** Percentiles and interval probabilities. It is much faster to calculate $P(X \le x)$ or $P(a < X \le b)$ because you only need one or two subtractions rather than summing multiple PMF values.
+
+## 14. Application Extension
+To extend an application (like a Python script or Excel tool) to accept CDF input:
+- **Validation:** Ensure the CDF values are non-decreasing and end at $1.0$.
+- **Conversion:** Implement a loop where `PMF[i] = CDF[i] - CDF[i-1]` (with `CDF[-1] = 0`).
+- **Search:** Use a binary search or "Look Up" function so that for any input $x$, the program returns the value of the CDF for the largest $x_i \le x$.

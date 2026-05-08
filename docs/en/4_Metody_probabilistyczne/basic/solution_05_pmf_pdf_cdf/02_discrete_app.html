@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CDF to PMF: Interactive Explorer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0a0c10;
+            --card-bg: rgba(22, 27, 34, 0.7);
+            --accent-primary: #3fb950; /* Success/Probability Green */
+            --accent-secondary: #58a6ff; /* Info Blue */
+            --accent-tertiary: #f0883e; /* Warning Orange */
+            --text-main: #c9d1d9;
+            --text-dim: #8b949e;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #161b22, var(--bg-dark));
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: var(--text-dim);
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 25px;
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        @media (max-width: 1000px) {
+            .main-layout { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--accent-secondary);
+        }
+
+        /* Controls */
+        .control-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .val-label { font-weight: 700; color: var(--accent-primary); }
+        .x-label { font-family: 'JetBrains Mono', monospace; color: var(--text-dim); }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: #30363d;
+            border-radius: 5px;
+            outline: none;
+            -webkit-appearance: none;
+            accent-color: var(--accent-primary);
+        }
+
+        /* Stats & Calculator */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-val {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            margin-top: 5px;
+        }
+
+        /* Charts */
+        .charts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .chart-box {
+            height: 400px;
+            position: relative;
+        }
+
+        /* Calculator Overlay */
+        .calc-overlay {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.1), rgba(63, 185, 80, 0.1));
+            border-radius: 15px;
+            border: 1px solid rgba(88, 166, 255, 0.2);
+        }
+
+        .calc-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .calc-result {
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Discrete Distribution Explorer</h1>
+        <p>Analyzing the Cumulative Distribution Function (CDF) and its underlying Probability Mass Function (PMF)</p>
+    </div>
+
+    <div class="main-layout">
+        <!-- Sidebar Controls -->
+        <div class="card">
+            <div class="section-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>
+                CDF Reconstruction
+            </div>
+            
+            <p style="font-size: 0.9rem; color: var(--text-dim); margin-bottom: 25px;">
+                Adjust the cumulative values $F(x)$ below. Jumps are automatically calculated to derive the PMF.
+            </p>
+
+            <div id="controls">
+                <!-- Dynamically generated sliders -->
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-val" id="stat-mean">1.85</div>
+                    <div class="stat-label">Expected Value</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-val" id="stat-support">5</div>
+                    <div class="stat-label">Support Points</div>
+                </div>
+            </div>
+
+            <div class="calc-overlay">
+                <div class="section-title" style="font-size: 1rem; color: var(--accent-primary);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="8" y1="16" x2="16" y2="16"/></svg>
+                    Probability Calculator
+                </div>
+                <div id="calculator-results">
+                    <!-- Dynamic results -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chart Area -->
+        <div class="charts-container">
+            <div class="card">
+                <div class="section-title">Cumulative Distribution Function (Staircase)</div>
+                <div class="chart-box">
+                    <canvas id="cdfChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="section-title">Probability Mass Function (Spikes)</div>
+                <div class="chart-box">
+                    <canvas id="pmfChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CONFIG = {
+            support: [-1, 0, 2, 4, 6],
+            initialF: [0.15, 0.35, 0.60, 0.85, 1.00],
+            colors: {
+                pmf: '#3fb950',
+                cdf: '#58a6ff',
+                grid: 'rgba(255, 255, 255, 0.05)',
+                text: '#8b949e'
+            }
+        };
+
+        let currentF = [...CONFIG.initialF];
+        let currentP = [];
+        let cdfChart, pmfChart;
+
+        function init() {
+            createControls();
+            calculatePMF();
+            initCharts();
+            updateAll();
+        }
+
+        function createControls() {
+            const container = document.getElementById('controls');
+            CONFIG.support.forEach((x, i) => {
+                const group = document.createElement('div');
+                group.className = 'control-group';
+                
+                // Last one is fixed to 1.0
+                const isLast = i === CONFIG.support.length - 1;
+                
+                group.innerHTML = `
+                    <div class="control-header">
+                        <span class="x-label">F(x = ${x})</span>
+                        <span class="val-label" id="val-${i}">${currentF[i].toFixed(2)}</span>
+                    </div>
+                    <input type="range" 
+                           id="range-${i}" 
+                           min="0" max="100" 
+                           value="${currentF[i] * 100}" 
+                           ${isLast ? 'disabled style="opacity:0.3"' : ''}
+                           oninput="onSliderChange(${i}, this.value)">
+                `;
+                container.appendChild(group);
+            });
+        }
+
+        function onSliderChange(index, val) {
+            const numericVal = val / 100;
+            currentF[index] = numericVal;
+
+            // Enforce non-decreasing constraint
+            for (let i = index + 1; i < currentF.length - 1; i++) {
+                if (currentF[i] < currentF[i-1]) {
+                    currentF[i] = currentF[i-1];
+                    document.getElementById(`range-${i}`).value = currentF[i] * 100;
+                }
+            }
+            for (let i = index - 1; i >= 0; i--) {
+                if (currentF[i] > currentF[i+1]) {
+                    currentF[i] = currentF[i+1];
+                    document.getElementById(`range-${i}`).value = currentF[i] * 100;
+                }
+            }
+
+            updateAll();
+        }
+
+        function calculatePMF() {
+            currentP = currentF.map((f, i) => {
+                if (i === 0) return f;
+                return f - currentF[i-1];
+            });
+        }
+
+        function calculateStats() {
+            let mean = 0;
+            currentP.forEach((p, i) => {
+                mean += CONFIG.support[i] * p;
+            });
+            document.getElementById('stat-mean').innerText = mean.toFixed(2);
+        }
+
+        function updateCalculator() {
+            // Examples from the doc
+            const p2 = currentP[2]; // P(X=2)
+            const ple2 = currentF[2]; // P(X<=2)
+            const plt2 = currentF[1]; // P(X<2)
+            const p04 = currentF[3] - currentF[1]; // P(0<X<=4)
+            const pgt2 = 1 - currentF[2]; // P(X>2)
+
+            const container = document.getElementById('calculator-results');
+            container.innerHTML = `
+                <div class="calc-row"><span>P(X = 2)</span><span class="calc-result">${p2.toFixed(2)}</span></div>
+                <div class="calc-row"><span>P(X ≤ 2)</span><span class="calc-result">${ple2.toFixed(2)}</span></div>
+                <div class="calc-row"><span>P(X < 2)</span><span class="calc-result">${plt2.toFixed(2)}</span></div>
+                <div class="calc-row"><span>P(0 < X ≤ 4)</span><span class="calc-result">${p04.toFixed(2)}</span></div>
+                <div class="calc-row"><span>P(X > 2)</span><span class="calc-result">${pgt2.toFixed(2)}</span></div>
+            `;
+        }
+
+        function initCharts() {
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'linear',
+                        min: -2,
+                        max: 7,
+                        grid: { color: CONFIG.colors.grid },
+                        ticks: { color: CONFIG.colors.text }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: 1.1,
+                        grid: { color: CONFIG.colors.grid },
+                        ticks: { color: CONFIG.colors.text }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleFont: { family: 'Outfit' },
+                        bodyFont: { family: 'JetBrains Mono' }
+                    }
+                }
+            };
+
+            const ctxCDF = document.getElementById('cdfChart').getContext('2d');
+            cdfChart = new Chart(ctxCDF, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'F(x)',
+                        data: generateCDFPoints(),
+                        borderColor: CONFIG.colors.cdf,
+                        borderWidth: 4,
+                        stepped: 'before',
+                        pointRadius: 0,
+                        fill: false
+                    }, {
+                        label: 'Support Points',
+                        data: CONFIG.support.map((x, i) => ({x: x, y: currentF[i]})),
+                        pointBackgroundColor: CONFIG.colors.cdf,
+                        pointRadius: 6,
+                        showLine: false
+                    }]
+                },
+                options: chartOptions
+            });
+
+            const ctxPMF = document.getElementById('pmfChart').getContext('2d');
+            pmfChart = new Chart(ctxPMF, {
+                type: 'bar',
+                data: {
+                    labels: CONFIG.support,
+                    datasets: [{
+                        label: 'P(X = x)',
+                        data: currentP,
+                        backgroundColor: CONFIG.colors.pmf,
+                        borderRadius: 10,
+                        barThickness: 15
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    scales: {
+                        ...chartOptions.scales,
+                        x: {
+                            type: 'category',
+                            grid: { display: false },
+                            ticks: { color: CONFIG.colors.text }
+                        }
+                    }
+                }
+            });
+        }
+
+        function generateCDFPoints() {
+            const points = [];
+            points.push({x: -2, y: 0});
+            CONFIG.support.forEach((x, i) => {
+                points.push({x: x, y: currentF[i]});
+            });
+            points.push({x: 8, y: 1});
+            return points;
+        }
+
+        function updateAll() {
+            calculatePMF();
+            calculateStats();
+            updateCalculator();
+            
+            // Update labels
+            currentF.forEach((f, i) => {
+                const el = document.getElementById(`val-${i}`);
+                if (el) el.innerText = f.toFixed(2);
+            });
+
+            // Update charts
+            cdfChart.data.datasets[0].data = generateCDFPoints();
+            cdfChart.data.datasets[1].data = CONFIG.support.map((x, i) => ({x: x, y: currentF[i]}));
+            cdfChart.update('none');
+
+            pmfChart.data.datasets[0].data = currentP;
+            pmfChart.update('none');
+        }
+
+        init();
+    </script>
+</body>
+</html>
